@@ -1,0 +1,77 @@
+-- ============================================================
+-- Neuronal Archetype: Simple series
+-- A chain of neurons where each neuron receives as input
+-- the output (spike) of its predecessor.
+-- ============================================================
+
+MODULE main
+VAR
+  -- External stimulation of the first neuron in the chain
+  t    : 0..20;
+  stim : boolean;
+
+  n1 : lif_neuron(stim, FALSE, t);
+  n2 : lif_neuron(n1.spike, FALSE, t);
+  n3 : lif_neuron(n2.spike, FALSE, t);
+
+ASSIGN
+  init(t) := 0;
+  next(t) := (t < 20) ? (t + 1) : 20;
+
+  -- Deterministic prefix, then nondet.
+  next(stim) :=
+    case
+      t = 0 : TRUE;
+      t = 1 : FALSE;
+      t = 2 : TRUE;
+      t = 3 : TRUE;
+      TRUE  : {TRUE, FALSE};
+    esac;
+
+-- Baseline safety
+CTLSPEC AG (n1.spike -> AX (n1.P = 0))
+CTLSPEC AG (n2.spike -> AX (n2.P = 0))
+CTLSPEC AG (n3.spike -> AX (n3.P = 0))
+
+-- Propagation (conditional liveness):
+-- if the first neuron is continuously stimulated, the last neuron eventually spikes.
+LTLSPEC (G (stim & (n1.r_num >= 2))) -> (F n3.spike)
+
+
+MODULE lif_neuron(x_exc, x_inh, t)
+VAR
+  P : 0..10;
+  r_num : 0..4;
+
+DEFINE
+  Pmax := 10;
+  tau  := 4;
+  S := 4;
+
+  w_exc := 3;
+  w_inh := -3;
+
+  input_sum := (x_exc ? w_exc : 0) + (x_inh ? w_inh : 0);
+  leak_term := (r_num * P) / S;
+  raw_next  := leak_term + input_sum;
+
+  spike := (P >= tau);
+
+ASSIGN
+  init(P) := 0;
+  init(r_num) := 2;
+
+  next(r_num) :=
+    case
+      t < 4 : r_num;
+      TRUE  : 0..4;
+    esac;
+
+  next(P) :=
+    case
+      spike           : 0;
+      raw_next < 0    : 0;
+      raw_next > Pmax : Pmax;
+      TRUE            : raw_next;
+    esac;
+

@@ -1,0 +1,68 @@
+-- ============================================================
+-- Neuronal Archetype: Contralateral inhibition (winner-takes-all)
+-- Two neurons mutually inhibit each other while receiving a common excitation.
+-- ============================================================
+
+MODULE main
+VAR
+  t    : 0..20;
+  stim : boolean;
+
+  L : lif_neuron(stim, R.spike, t);  -- R inhibits L
+  R : lif_neuron(stim, L.spike, t);  -- L inhibits R
+
+ASSIGN
+  init(t) := 0;
+  next(t) := (t < 20) ? (t + 1) : 20;
+  next(stim) :=
+    case
+      t = 0 : TRUE;
+      t = 1 : TRUE;
+      t = 2 : TRUE;
+      t = 3 : TRUE;
+      TRUE  : {TRUE, FALSE};
+    esac;
+
+-- Mutual exclusion (winner-takes-all style safety).
+CTLSPEC AG !(L.spike & R.spike)
+
+-- There exists a run where L wins (eventually only L spikes) and R loses.
+CTLSPEC EF (EG (L.spike & !R.spike))
+
+-- And symmetrically, there exists a run where R wins.
+CTLSPEC EF (EG (R.spike & !L.spike))
+
+
+MODULE lif_neuron(x_exc, x_inh, t)
+VAR
+  P : 0..10;
+  r_num : 0..4;
+
+DEFINE
+  Pmax := 10;
+  tau  := 4;
+  S := 4;
+  w_exc := 3;
+  w_inh := -3;
+
+  input_sum := (x_exc ? w_exc : 0) + (x_inh ? w_inh : 0);
+  leak_term := (r_num * P) / S;
+  raw_next  := leak_term + input_sum;
+  spike := (P >= tau);
+
+ASSIGN
+  init(P) := 0;
+  init(r_num) := 2;
+  next(r_num) :=
+    case
+      t < 4 : r_num;
+      TRUE  : 0..4;
+    esac;
+  next(P) :=
+    case
+      spike           : 0;
+      raw_next < 0    : 0;
+      raw_next > Pmax : Pmax;
+      TRUE            : raw_next;
+    esac;
+

@@ -1,0 +1,98 @@
+{
+  "neurons": [
+    "n1",
+    "n2",
+    "n3",
+    "n4",
+    "n5"
+  ],
+  "inputs": [
+    "stim"
+  ],
+  "consts": {},
+  "edges": [
+    {
+      "src": "stim",
+      "dst": "n1",
+      "weight": 3
+    },
+    {
+      "src": "n1",
+      "dst": "n2",
+      "weight": 3
+    },
+    {
+      "src": "n2",
+      "dst": "n3",
+      "weight": 3
+    },
+    {
+      "src": "n3",
+      "dst": "n4",
+      "weight": 3
+    },
+    {
+      "src": "n4",
+      "dst": "n5",
+      "weight": 3
+    }
+  ],
+  "params": {
+    "default": {
+      "tau": 4,
+      "w_exc": 3,
+      "w_inh": -3,
+      "S": 4,
+      "R_init": 2,
+      "Pmax": 10
+    }
+  },
+  "neuron_params": {
+    "n1": "default",
+    "n2": "default",
+    "n3": "default",
+    "n4": "default",
+    "n5": "default"
+  },
+  "compositions": [
+    {
+      "kind": "sequential",
+      "neurons": [
+        "n1",
+        "n2",
+        "n3",
+        "n4",
+        "n5"
+      ],
+      "inferred": false
+    }
+  ],
+  "schedules": {
+    "stim": [
+      true,
+      true,
+      false,
+      true
+    ]
+  },
+  "user_specs": [],
+  "archetypes": [
+    {
+      "kind": "simple_series",
+      "nodes": [
+        "n1",
+        "n2",
+        "n3",
+        "n4",
+        "n5"
+      ],
+      "inputs": {
+        "stim": "stim"
+      },
+      "meta": {},
+      "explicit": true
+    }
+  ],
+  "neuron_roles": {},
+  "input_ties": {}
+}

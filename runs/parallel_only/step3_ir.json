@@ -1,0 +1,90 @@
+{
+  "neurons": [
+    "out1",
+    "out2",
+    "out3",
+    "src"
+  ],
+  "inputs": [
+    "stim"
+  ],
+  "consts": {},
+  "edges": [
+    {
+      "src": "stim",
+      "dst": "src",
+      "weight": 3
+    },
+    {
+      "src": "src",
+      "dst": "out1",
+      "weight": 3
+    },
+    {
+      "src": "src",
+      "dst": "out2",
+      "weight": 3
+    },
+    {
+      "src": "src",
+      "dst": "out3",
+      "weight": 3
+    }
+  ],
+  "params": {
+    "default": {
+      "tau": 4,
+      "w_exc": 3,
+      "w_inh": -3,
+      "S": 4,
+      "R_init": 2,
+      "Pmax": 10
+    }
+  },
+  "neuron_params": {
+    "out1": "default",
+    "out2": "default",
+    "out3": "default",
+    "src": "default"
+  },
+  "compositions": [
+    {
+      "kind": "parallel",
+      "neurons": [
+        "out1",
+        "out2",
+        "out3"
+      ],
+      "inferred": false
+    }
+  ],
+  "schedules": {
+    "stim": [
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "user_specs": [],
+  "archetypes": [
+    {
+      "kind": "parallel_composition",
+      "nodes": [
+        "src",
+        "out1",
+        "out2",
+        "out3"
+      ],
+      "inputs": {
+        "stim": "stim"
+      },
+      "meta": {
+        "src": "src"
+      },
+      "explicit": true
+    }
+  ],
+  "neuron_roles": {},
+  "input_ties": {}
+}

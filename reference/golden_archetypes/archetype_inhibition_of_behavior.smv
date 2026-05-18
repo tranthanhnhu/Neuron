@@ -1,0 +1,78 @@
+-- ============================================================
+-- Neuronal Archetype: Inhibition of a behavior
+-- Neuron I inhibits neuron T (target). When inhibition is continuously present,
+-- the target's spiking behavior is suppressed.
+-- ============================================================
+
+MODULE main
+VAR
+  t     : 0..20;
+  stimI : boolean;
+  stimT : boolean;
+
+  I : lif_neuron(stimI, FALSE, t);
+  T : lif_neuron(stimT, I.spike, t);  -- inhibitory input from I to T
+
+ASSIGN
+  init(t) := 0;
+  next(t) := (t < 20) ? (t + 1) : 20;
+
+  next(stimI) :=
+    case
+      t = 0 : FALSE;
+      t = 1 : TRUE;
+      t = 2 : TRUE;
+      t = 3 : TRUE;
+      TRUE  : {TRUE, FALSE};
+    esac;
+
+  next(stimT) :=
+    case
+      t = 0 : TRUE;
+      t = 1 : TRUE;
+      t = 2 : TRUE;
+      t = 3 : TRUE;
+      TRUE  : {TRUE, FALSE};
+    esac;
+
+-- If inhibitor spikes continuously, the target should stay silent.
+LTLSPEC (G (I.spike & (I.r_num >= 2))) -> (G !T.spike)
+
+-- If the target is continuously stimulated and inhibitor is absent,
+-- the target should eventually spike.
+LTLSPEC (G (stimT & !I.spike & (T.r_num >= 2))) -> (F T.spike)
+
+
+MODULE lif_neuron(x_exc, x_inh, t)
+VAR
+  P : 0..10;
+  r_num : 0..4;
+
+DEFINE
+  Pmax := 10;
+  tau  := 4;
+  S := 4;
+  w_exc := 3;
+  w_inh := -3;
+
+  input_sum := (x_exc ? w_exc : 0) + (x_inh ? w_inh : 0);
+  leak_term := (r_num * P) / S;
+  raw_next  := leak_term + input_sum;
+  spike := (P >= tau);
+
+ASSIGN
+  init(P) := 0;
+  init(r_num) := 2;
+  next(r_num) :=
+    case
+      t < 4 : r_num;
+      TRUE  : 0..4;
+    esac;
+  next(P) :=
+    case
+      spike           : 0;
+      raw_next < 0    : 0;
+      raw_next > Pmax : Pmax;
+      TRUE            : raw_next;
+    esac;
+

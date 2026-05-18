@@ -1,0 +1,8 @@
+# snn_mc has no third-party runtime dependencies.
+# Python >= 3.10 is required (uses PEP 604 union types and dataclass features).
+#
+# NuSMV must be installed externally and reachable on PATH:
+#   https://nusmv.fbk.eu/downloads.html
+#
+# Optional development dependencies:
+#   pytest>=7  # for tests/test_pipeline_smoke.py

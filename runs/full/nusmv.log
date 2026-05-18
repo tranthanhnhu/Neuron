@@ -1,0 +1,1420 @@
+*** This is NuSMV 2.7.1 (compiled on Mon Sep 29 16:07:59 2025)
+*** Enabled addons are: compass
+*** For more information on NuSMV see <http://nusmv.fbk.eu>
+*** or email to <nusmv-users@list.fbk.eu>.
+*** Please report bugs to <Please report bugs to <nusmv-users@fbk.eu>>
+
+*** Copyright (c) 2010-2025, Fondazione Bruno Kessler
+
+*** This version of NuSMV is linked to the CUDD library version 2.4.1
+*** Copyright (c) 1995-2004, Regents of the University of Colorado
+
+*** This version of NuSMV is linked to the MiniSat SAT solver. 
+*** See http://minisat.se/MiniSat.html
+*** Copyright (c) 2003-2006, Niklas Een, Niklas Sorensson
+*** Copyright (c) 2007-2010, Niklas Sorensson
+
+-- specification AG (c1.spike -> AX c1.P = 0)  is true
+-- specification AG (c1.P >= 0 & c1.P <= c1.Pmax)  is true
+-- specification AG (c2.spike -> AX c2.P = 0)  is true
+-- specification AG (c2.P >= 0 & c2.P <= c2.Pmax)  is true
+-- specification AG (c1.spike -> EF c2.spike)  is true
+-- specification AG (c3.spike -> AX c3.P = 0)  is true
+-- specification AG (c3.P >= 0 & c3.P <= c3.Pmax)  is true
+-- specification AG (c2.spike -> EF c3.spike)  is true
+-- specification AG (c4.spike -> AX c4.P = 0)  is true
+-- specification AG (c4.P >= 0 & c4.P <= c4.Pmax)  is true
+-- specification AG (c3.spike -> EF c4.spike)  is true
+-- specification AG (a.spike -> AX a.P = 0)  is true
+-- specification AG (a.P >= 0 & a.P <= a.Pmax)  is true
+-- specification AG (b.spike -> AX b.P = 0)  is true
+-- specification AG (b.P >= 0 & b.P <= b.Pmax)  is true
+-- specification AG !(a.spike & b.spike)  is true
+-- specification AG (a.spike -> EF b.spike)  is true
+-- specification EF a.spike  is true
+-- specification EF b.spike  is true
+-- specification ( G (stim & c1.r_num >= 2) ->  F c4.spike)  is true
+-- specification ( G ( F c4.spike) -> ( G ( F b.spike) &  G ( F !b.spike)))  is false
+-- as demonstrated by the following execution sequence
+Trace Description: LTL Counterexample 
+Trace Type: Counterexample 
+  -> State: 1.1 <-
+    t = 0
+    stim = FALSE
+    a.P = 0
+    a.r_num = 2
+    b.P = 0
+    b.r_num = 2
+    c1.P = 0
+    c1.r_num = 2
+    c2.P = 0
+    c2.r_num = 2
+    c3.P = 0
+    c3.r_num = 2
+    c4.P = 0
+    c4.r_num = 2
+    a.spike = FALSE
+    a.raw_next = 0
+    a.leak_term = 0
+    a.input_sum = 0
+    a.w_inh = -3
+    a.w_exc = 3
+    a.S_leak = 4
+    a.tau = 4
+    a.Pmax = 10
+    b.spike = FALSE
+    b.raw_next = 0
+    b.leak_term = 0
+    b.input_sum = 0
+    b.w_inh = -3
+    b.w_exc = 3
+    b.S_leak = 4
+    b.tau = 4
+    b.Pmax = 10
+    c1.spike = FALSE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c1.w_inh = -3
+    c1.w_exc = 3
+    c1.S_leak = 4
+    c1.tau = 4
+    c1.Pmax = 10
+    c2.spike = FALSE
+    c2.raw_next = 0
+    c2.leak_term = 0
+    c2.input_sum = 0
+    c2.w_inh = -3
+    c2.w_exc = 3
+    c2.S_leak = 4
+    c2.tau = 4
+    c2.Pmax = 10
+    c3.spike = FALSE
+    c3.raw_next = 0
+    c3.leak_term = 0
+    c3.input_sum = 0
+    c3.w_inh = -3
+    c3.w_exc = 3
+    c3.S_leak = 4
+    c3.tau = 4
+    c3.Pmax = 10
+    c4.spike = FALSE
+    c4.raw_next = 0
+    c4.leak_term = 0
+    c4.input_sum = 0
+    c4.w_inh = -3
+    c4.w_exc = 3
+    c4.S_leak = 4
+    c4.tau = 4
+    c4.Pmax = 10
+  -> State: 1.2 <-
+    t = 1
+    stim = TRUE
+    c1.raw_next = 3
+    c1.input_sum = 3
+  -> State: 1.3 <-
+    t = 2
+    c1.P = 3
+    c1.raw_next = 4
+    c1.leak_term = 1
+  -> State: 1.4 <-
+    t = 3
+    stim = FALSE
+    c1.P = 4
+    c1.spike = TRUE
+    c1.raw_next = 2
+    c1.leak_term = 2
+    c1.input_sum = 0
+    c2.raw_next = 3
+    c2.input_sum = 3
+  -> State: 1.5 <-
+    t = 4
+    stim = TRUE
+    c1.P = 0
+    c2.P = 3
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.leak_term = 0
+    c1.input_sum = 3
+    c2.raw_next = 1
+    c2.leak_term = 1
+    c2.input_sum = 0
+  -> State: 1.6 <-
+    t = 5
+    a.r_num = 0
+    b.r_num = 0
+    c1.P = 3
+    c1.r_num = 3
+    c2.P = 1
+    c2.r_num = 4
+    c3.r_num = 0
+    c4.r_num = 0
+    c1.raw_next = 5
+    c1.leak_term = 2
+  -> State: 1.7 <-
+    t = 6
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 4
+    c2.input_sum = 3
+  -> State: 1.8 <-
+    t = 7
+    stim = TRUE
+    c1.P = 0
+    c2.P = 4
+    c2.r_num = 0
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.spike = TRUE
+    c2.raw_next = 0
+    c2.leak_term = 0
+    c2.input_sum = 0
+    c3.raw_next = 3
+    c3.input_sum = 3
+  -> State: 1.9 <-
+    t = 8
+    c1.P = 3
+    c1.r_num = 3
+    c2.P = 0
+    c3.P = 3
+    c3.r_num = 4
+    c1.raw_next = 5
+    c1.leak_term = 2
+    c2.spike = FALSE
+    c3.leak_term = 3
+    c3.input_sum = 0
+  -> State: 1.10 <-
+    t = 9
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 3
+    c2.input_sum = 3
+  -> State: 1.11 <-
+    t = 10
+    stim = TRUE
+    c1.P = 0
+    c2.P = 3
+    c2.r_num = 4
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.leak_term = 3
+    c2.input_sum = 0
+  -> State: 1.12 <-
+    t = 11
+    c1.P = 3
+    c1.r_num = 3
+    c1.raw_next = 5
+    c1.leak_term = 2
+  -> State: 1.13 <-
+    t = 12
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c2.r_num = 3
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 5
+    c2.leak_term = 2
+    c2.input_sum = 3
+  -> State: 1.14 <-
+    t = 13
+    stim = TRUE
+    c1.P = 0
+    c2.P = 5
+    c2.r_num = 0
+    c3.r_num = 3
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.spike = TRUE
+    c2.raw_next = 0
+    c2.leak_term = 0
+    c2.input_sum = 0
+    c3.raw_next = 5
+    c3.leak_term = 2
+    c3.input_sum = 3
+  -> State: 1.15 <-
+    t = 14
+    c1.P = 3
+    c1.r_num = 3
+    c2.P = 0
+    c3.P = 5
+    c3.r_num = 0
+    c1.raw_next = 5
+    c1.leak_term = 2
+    c2.spike = FALSE
+    c3.spike = TRUE
+    c3.raw_next = 0
+    c3.leak_term = 0
+    c3.input_sum = 0
+    c4.raw_next = 3
+    c4.input_sum = 3
+  -> State: 1.16 <-
+    t = 15
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c3.P = 0
+    c4.P = 3
+    c4.r_num = 4
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 3
+    c2.input_sum = 3
+    c3.spike = FALSE
+    c4.leak_term = 3
+    c4.input_sum = 0
+  -> State: 1.17 <-
+    t = 16
+    stim = TRUE
+    c1.P = 0
+    c2.P = 3
+    c2.r_num = 4
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.leak_term = 3
+    c2.input_sum = 0
+  -> State: 1.18 <-
+    t = 17
+    c1.P = 3
+    c1.r_num = 3
+    c1.raw_next = 5
+    c1.leak_term = 2
+  -> State: 1.19 <-
+    t = 18
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c2.r_num = 3
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 5
+    c2.leak_term = 2
+    c2.input_sum = 3
+  -> State: 1.20 <-
+    t = 19
+    stim = TRUE
+    c1.P = 0
+    c2.P = 5
+    c2.r_num = 0
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.spike = TRUE
+    c2.raw_next = 0
+    c2.leak_term = 0
+    c2.input_sum = 0
+    c3.raw_next = 3
+    c3.input_sum = 3
+  -> State: 1.21 <-
+    t = 20
+    c1.P = 3
+    c1.r_num = 3
+    c2.P = 0
+    c3.P = 3
+    c3.r_num = 4
+    c1.raw_next = 5
+    c1.leak_term = 2
+    c2.spike = FALSE
+    c3.leak_term = 3
+    c3.input_sum = 0
+  -> State: 1.22 <-
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 3
+    c2.input_sum = 3
+  -> State: 1.23 <-
+    stim = TRUE
+    c1.P = 0
+    c2.P = 3
+    c2.r_num = 4
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.leak_term = 3
+    c2.input_sum = 0
+  -> State: 1.24 <-
+    c1.P = 3
+    c1.r_num = 3
+    c1.raw_next = 5
+    c1.leak_term = 2
+  -> State: 1.25 <-
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c2.r_num = 3
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 5
+    c2.leak_term = 2
+    c2.input_sum = 3
+  -> State: 1.26 <-
+    stim = TRUE
+    c1.P = 0
+    c2.P = 5
+    c2.r_num = 0
+    c3.r_num = 3
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.spike = TRUE
+    c2.raw_next = 0
+    c2.leak_term = 0
+    c2.input_sum = 0
+    c3.raw_next = 5
+    c3.leak_term = 2
+    c3.input_sum = 3
+  -> State: 1.27 <-
+    c1.P = 3
+    c1.r_num = 1
+    c2.P = 0
+    c3.P = 5
+    c3.r_num = 0
+    c4.r_num = 3
+    c2.spike = FALSE
+    c3.spike = TRUE
+    c3.raw_next = 0
+    c3.leak_term = 0
+    c3.input_sum = 0
+    c4.raw_next = 5
+    c4.leak_term = 2
+    c4.input_sum = 3
+  -> State: 1.28 <-
+    stim = FALSE
+    c1.r_num = 0
+    c3.P = 0
+    c4.P = 5
+    c4.r_num = 0
+    a.raw_next = 3
+    a.input_sum = 3
+    c1.raw_next = 0
+    c1.input_sum = 0
+    c3.spike = FALSE
+    c4.spike = TRUE
+    c4.raw_next = 0
+    c4.leak_term = 0
+    c4.input_sum = 0
+  -- Loop starts here
+  -> State: 1.29 <-
+    a.P = 3
+    c1.P = 0
+    c4.P = 0
+    a.raw_next = 0
+    a.input_sum = 0
+    c4.spike = FALSE
+  -> State: 1.30 <-
+    stim = TRUE
+    a.P = 0
+    c1.raw_next = 3
+    c1.input_sum = 3
+  -> State: 1.31 <-
+    c1.P = 3
+    c1.r_num = 3
+    c1.raw_next = 5
+    c1.leak_term = 2
+  -> State: 1.32 <-
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 3
+    c2.input_sum = 3
+  -> State: 1.33 <-
+    stim = TRUE
+    c1.P = 0
+    c2.P = 3
+    c2.r_num = 4
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.leak_term = 3
+    c2.input_sum = 0
+  -> State: 1.34 <-
+    c1.P = 3
+    c1.r_num = 3
+    c1.raw_next = 5
+    c1.leak_term = 2
+  -> State: 1.35 <-
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c2.r_num = 3
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 5
+    c2.leak_term = 2
+    c2.input_sum = 3
+  -> State: 1.36 <-
+    stim = TRUE
+    c1.P = 0
+    c2.P = 5
+    c2.r_num = 0
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.spike = TRUE
+    c2.raw_next = 0
+    c2.leak_term = 0
+    c2.input_sum = 0
+    c3.raw_next = 3
+    c3.input_sum = 3
+  -> State: 1.37 <-
+    c1.P = 3
+    c1.r_num = 3
+    c2.P = 0
+    c3.P = 3
+    c3.r_num = 4
+    c1.raw_next = 5
+    c1.leak_term = 2
+    c2.spike = FALSE
+    c3.leak_term = 3
+    c3.input_sum = 0
+  -> State: 1.38 <-
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 3
+    c2.input_sum = 3
+  -> State: 1.39 <-
+    stim = TRUE
+    c1.P = 0
+    c2.P = 3
+    c2.r_num = 4
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.leak_term = 3
+    c2.input_sum = 0
+  -> State: 1.40 <-
+    c1.P = 3
+    c1.r_num = 3
+    c1.raw_next = 5
+    c1.leak_term = 2
+  -> State: 1.41 <-
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c2.r_num = 3
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 5
+    c2.leak_term = 2
+    c2.input_sum = 3
+  -> State: 1.42 <-
+    stim = TRUE
+    c1.P = 0
+    c2.P = 5
+    c2.r_num = 0
+    c3.r_num = 3
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.spike = TRUE
+    c2.raw_next = 0
+    c2.leak_term = 0
+    c2.input_sum = 0
+    c3.raw_next = 5
+    c3.leak_term = 2
+    c3.input_sum = 3
+  -> State: 1.43 <-
+    c1.P = 3
+    c1.r_num = 3
+    c2.P = 0
+    c3.P = 5
+    c3.r_num = 0
+    c1.raw_next = 5
+    c1.leak_term = 2
+    c2.spike = FALSE
+    c3.spike = TRUE
+    c3.raw_next = 0
+    c3.leak_term = 0
+    c3.input_sum = 0
+    c4.raw_next = 3
+    c4.input_sum = 3
+  -> State: 1.44 <-
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c3.P = 0
+    c4.P = 3
+    c4.r_num = 4
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 3
+    c2.input_sum = 3
+    c3.spike = FALSE
+    c4.leak_term = 3
+    c4.input_sum = 0
+  -> State: 1.45 <-
+    stim = TRUE
+    c1.P = 0
+    c2.P = 3
+    c2.r_num = 4
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.leak_term = 3
+    c2.input_sum = 0
+  -> State: 1.46 <-
+    c1.P = 3
+    c1.r_num = 3
+    c1.raw_next = 5
+    c1.leak_term = 2
+  -> State: 1.47 <-
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c2.r_num = 3
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 5
+    c2.leak_term = 2
+    c2.input_sum = 3
+  -> State: 1.48 <-
+    stim = TRUE
+    c1.P = 0
+    c2.P = 5
+    c2.r_num = 0
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.spike = TRUE
+    c2.raw_next = 0
+    c2.leak_term = 0
+    c2.input_sum = 0
+    c3.raw_next = 3
+    c3.input_sum = 3
+  -> State: 1.49 <-
+    c1.P = 3
+    c1.r_num = 3
+    c2.P = 0
+    c3.P = 3
+    c3.r_num = 4
+    c1.raw_next = 5
+    c1.leak_term = 2
+    c2.spike = FALSE
+    c3.leak_term = 3
+    c3.input_sum = 0
+  -> State: 1.50 <-
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 3
+    c2.input_sum = 3
+  -> State: 1.51 <-
+    stim = TRUE
+    c1.P = 0
+    c2.P = 3
+    c2.r_num = 4
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.leak_term = 3
+    c2.input_sum = 0
+  -> State: 1.52 <-
+    c1.P = 3
+    c1.r_num = 3
+    c1.raw_next = 5
+    c1.leak_term = 2
+  -> State: 1.53 <-
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c2.r_num = 3
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 5
+    c2.leak_term = 2
+    c2.input_sum = 3
+  -> State: 1.54 <-
+    stim = TRUE
+    c1.P = 0
+    c2.P = 5
+    c2.r_num = 0
+    c3.r_num = 3
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.spike = TRUE
+    c2.raw_next = 0
+    c2.leak_term = 0
+    c2.input_sum = 0
+    c3.raw_next = 5
+    c3.leak_term = 2
+    c3.input_sum = 3
+  -> State: 1.55 <-
+    c1.P = 3
+    c1.r_num = 1
+    c2.P = 0
+    c3.P = 5
+    c3.r_num = 0
+    c4.r_num = 3
+    c2.spike = FALSE
+    c3.spike = TRUE
+    c3.raw_next = 0
+    c3.leak_term = 0
+    c3.input_sum = 0
+    c4.raw_next = 5
+    c4.leak_term = 2
+    c4.input_sum = 3
+  -> State: 1.56 <-
+    stim = FALSE
+    c1.r_num = 0
+    c3.P = 0
+    c4.P = 5
+    c4.r_num = 0
+    a.raw_next = 3
+    a.input_sum = 3
+    c1.raw_next = 0
+    c1.input_sum = 0
+    c3.spike = FALSE
+    c4.spike = TRUE
+    c4.raw_next = 0
+    c4.leak_term = 0
+    c4.input_sum = 0
+  -> State: 1.57 <-
+    a.P = 3
+    c1.P = 0
+    c4.P = 0
+    a.raw_next = 0
+    a.input_sum = 0
+    c4.spike = FALSE
+-- specification ( G ( F c4.spike) -> ( G ( F (a.spike & !b.spike)) &  G ( F (!a.spike & b.spike))))  is false
+-- as demonstrated by the following execution sequence
+Trace Description: LTL Counterexample 
+Trace Type: Counterexample 
+  -> State: 2.1 <-
+    t = 0
+    stim = FALSE
+    a.P = 0
+    a.r_num = 2
+    b.P = 0
+    b.r_num = 2
+    c1.P = 0
+    c1.r_num = 2
+    c2.P = 0
+    c2.r_num = 2
+    c3.P = 0
+    c3.r_num = 2
+    c4.P = 0
+    c4.r_num = 2
+    a.spike = FALSE
+    a.raw_next = 0
+    a.leak_term = 0
+    a.input_sum = 0
+    a.w_inh = -3
+    a.w_exc = 3
+    a.S_leak = 4
+    a.tau = 4
+    a.Pmax = 10
+    b.spike = FALSE
+    b.raw_next = 0
+    b.leak_term = 0
+    b.input_sum = 0
+    b.w_inh = -3
+    b.w_exc = 3
+    b.S_leak = 4
+    b.tau = 4
+    b.Pmax = 10
+    c1.spike = FALSE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c1.w_inh = -3
+    c1.w_exc = 3
+    c1.S_leak = 4
+    c1.tau = 4
+    c1.Pmax = 10
+    c2.spike = FALSE
+    c2.raw_next = 0
+    c2.leak_term = 0
+    c2.input_sum = 0
+    c2.w_inh = -3
+    c2.w_exc = 3
+    c2.S_leak = 4
+    c2.tau = 4
+    c2.Pmax = 10
+    c3.spike = FALSE
+    c3.raw_next = 0
+    c3.leak_term = 0
+    c3.input_sum = 0
+    c3.w_inh = -3
+    c3.w_exc = 3
+    c3.S_leak = 4
+    c3.tau = 4
+    c3.Pmax = 10
+    c4.spike = FALSE
+    c4.raw_next = 0
+    c4.leak_term = 0
+    c4.input_sum = 0
+    c4.w_inh = -3
+    c4.w_exc = 3
+    c4.S_leak = 4
+    c4.tau = 4
+    c4.Pmax = 10
+  -> State: 2.2 <-
+    t = 1
+    stim = TRUE
+    c1.raw_next = 3
+    c1.input_sum = 3
+  -> State: 2.3 <-
+    t = 2
+    c1.P = 3
+    c1.raw_next = 4
+    c1.leak_term = 1
+  -> State: 2.4 <-
+    t = 3
+    stim = FALSE
+    c1.P = 4
+    c1.spike = TRUE
+    c1.raw_next = 2
+    c1.leak_term = 2
+    c1.input_sum = 0
+    c2.raw_next = 3
+    c2.input_sum = 3
+  -> State: 2.5 <-
+    t = 4
+    stim = TRUE
+    c1.P = 0
+    c2.P = 3
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.leak_term = 0
+    c1.input_sum = 3
+    c2.raw_next = 1
+    c2.leak_term = 1
+    c2.input_sum = 0
+  -> State: 2.6 <-
+    t = 5
+    a.r_num = 0
+    b.r_num = 0
+    c1.P = 3
+    c1.r_num = 3
+    c2.P = 1
+    c2.r_num = 4
+    c3.r_num = 0
+    c4.r_num = 0
+    c1.raw_next = 5
+    c1.leak_term = 2
+  -> State: 2.7 <-
+    t = 6
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 4
+    c2.input_sum = 3
+  -> State: 2.8 <-
+    t = 7
+    stim = TRUE
+    c1.P = 0
+    c2.P = 4
+    c2.r_num = 0
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.spike = TRUE
+    c2.raw_next = 0
+    c2.leak_term = 0
+    c2.input_sum = 0
+    c3.raw_next = 3
+    c3.input_sum = 3
+  -> State: 2.9 <-
+    t = 8
+    c1.P = 3
+    c1.r_num = 3
+    c2.P = 0
+    c3.P = 3
+    c3.r_num = 4
+    c1.raw_next = 5
+    c1.leak_term = 2
+    c2.spike = FALSE
+    c3.leak_term = 3
+    c3.input_sum = 0
+  -> State: 2.10 <-
+    t = 9
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 3
+    c2.input_sum = 3
+  -> State: 2.11 <-
+    t = 10
+    stim = TRUE
+    c1.P = 0
+    c2.P = 3
+    c2.r_num = 4
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.leak_term = 3
+    c2.input_sum = 0
+  -> State: 2.12 <-
+    t = 11
+    c1.P = 3
+    c1.r_num = 3
+    c1.raw_next = 5
+    c1.leak_term = 2
+  -> State: 2.13 <-
+    t = 12
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c2.r_num = 3
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 5
+    c2.leak_term = 2
+    c2.input_sum = 3
+  -> State: 2.14 <-
+    t = 13
+    stim = TRUE
+    c1.P = 0
+    c2.P = 5
+    c2.r_num = 0
+    c3.r_num = 3
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.spike = TRUE
+    c2.raw_next = 0
+    c2.leak_term = 0
+    c2.input_sum = 0
+    c3.raw_next = 5
+    c3.leak_term = 2
+    c3.input_sum = 3
+  -> State: 2.15 <-
+    t = 14
+    c1.P = 3
+    c1.r_num = 3
+    c2.P = 0
+    c3.P = 5
+    c3.r_num = 0
+    c1.raw_next = 5
+    c1.leak_term = 2
+    c2.spike = FALSE
+    c3.spike = TRUE
+    c3.raw_next = 0
+    c3.leak_term = 0
+    c3.input_sum = 0
+    c4.raw_next = 3
+    c4.input_sum = 3
+  -> State: 2.16 <-
+    t = 15
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c3.P = 0
+    c4.P = 3
+    c4.r_num = 4
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 3
+    c2.input_sum = 3
+    c3.spike = FALSE
+    c4.leak_term = 3
+    c4.input_sum = 0
+  -> State: 2.17 <-
+    t = 16
+    stim = TRUE
+    c1.P = 0
+    c2.P = 3
+    c2.r_num = 4
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.leak_term = 3
+    c2.input_sum = 0
+  -> State: 2.18 <-
+    t = 17
+    c1.P = 3
+    c1.r_num = 3
+    c1.raw_next = 5
+    c1.leak_term = 2
+  -> State: 2.19 <-
+    t = 18
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c2.r_num = 3
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 5
+    c2.leak_term = 2
+    c2.input_sum = 3
+  -> State: 2.20 <-
+    t = 19
+    stim = TRUE
+    c1.P = 0
+    c2.P = 5
+    c2.r_num = 0
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.spike = TRUE
+    c2.raw_next = 0
+    c2.leak_term = 0
+    c2.input_sum = 0
+    c3.raw_next = 3
+    c3.input_sum = 3
+  -> State: 2.21 <-
+    t = 20
+    c1.P = 3
+    c1.r_num = 3
+    c2.P = 0
+    c3.P = 3
+    c3.r_num = 4
+    c1.raw_next = 5
+    c1.leak_term = 2
+    c2.spike = FALSE
+    c3.leak_term = 3
+    c3.input_sum = 0
+  -> State: 2.22 <-
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 3
+    c2.input_sum = 3
+  -> State: 2.23 <-
+    stim = TRUE
+    c1.P = 0
+    c2.P = 3
+    c2.r_num = 4
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.leak_term = 3
+    c2.input_sum = 0
+  -> State: 2.24 <-
+    c1.P = 3
+    c1.r_num = 3
+    c1.raw_next = 5
+    c1.leak_term = 2
+  -> State: 2.25 <-
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c2.r_num = 3
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 5
+    c2.leak_term = 2
+    c2.input_sum = 3
+  -> State: 2.26 <-
+    stim = TRUE
+    c1.P = 0
+    c2.P = 5
+    c2.r_num = 0
+    c3.r_num = 3
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.spike = TRUE
+    c2.raw_next = 0
+    c2.leak_term = 0
+    c2.input_sum = 0
+    c3.raw_next = 5
+    c3.leak_term = 2
+    c3.input_sum = 3
+  -> State: 2.27 <-
+    c1.P = 3
+    c1.r_num = 1
+    c2.P = 0
+    c3.P = 5
+    c3.r_num = 0
+    c4.r_num = 3
+    c2.spike = FALSE
+    c3.spike = TRUE
+    c3.raw_next = 0
+    c3.leak_term = 0
+    c3.input_sum = 0
+    c4.raw_next = 5
+    c4.leak_term = 2
+    c4.input_sum = 3
+  -> State: 2.28 <-
+    stim = FALSE
+    c1.r_num = 0
+    c3.P = 0
+    c4.P = 5
+    c4.r_num = 0
+    a.raw_next = 3
+    a.input_sum = 3
+    c1.raw_next = 0
+    c1.input_sum = 0
+    c3.spike = FALSE
+    c4.spike = TRUE
+    c4.raw_next = 0
+    c4.leak_term = 0
+    c4.input_sum = 0
+  -- Loop starts here
+  -> State: 2.29 <-
+    a.P = 3
+    c1.P = 0
+    c4.P = 0
+    a.raw_next = 0
+    a.input_sum = 0
+    c4.spike = FALSE
+  -> State: 2.30 <-
+    stim = TRUE
+    a.P = 0
+    c1.raw_next = 3
+    c1.input_sum = 3
+  -> State: 2.31 <-
+    c1.P = 3
+    c1.r_num = 3
+    c1.raw_next = 5
+    c1.leak_term = 2
+  -> State: 2.32 <-
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 3
+    c2.input_sum = 3
+  -> State: 2.33 <-
+    stim = TRUE
+    c1.P = 0
+    c2.P = 3
+    c2.r_num = 4
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.leak_term = 3
+    c2.input_sum = 0
+  -> State: 2.34 <-
+    c1.P = 3
+    c1.r_num = 3
+    c1.raw_next = 5
+    c1.leak_term = 2
+  -> State: 2.35 <-
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c2.r_num = 3
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 5
+    c2.leak_term = 2
+    c2.input_sum = 3
+  -> State: 2.36 <-
+    stim = TRUE
+    c1.P = 0
+    c2.P = 5
+    c2.r_num = 0
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.spike = TRUE
+    c2.raw_next = 0
+    c2.leak_term = 0
+    c2.input_sum = 0
+    c3.raw_next = 3
+    c3.input_sum = 3
+  -> State: 2.37 <-
+    c1.P = 3
+    c1.r_num = 3
+    c2.P = 0
+    c3.P = 3
+    c3.r_num = 4
+    c1.raw_next = 5
+    c1.leak_term = 2
+    c2.spike = FALSE
+    c3.leak_term = 3
+    c3.input_sum = 0
+  -> State: 2.38 <-
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 3
+    c2.input_sum = 3
+  -> State: 2.39 <-
+    stim = TRUE
+    c1.P = 0
+    c2.P = 3
+    c2.r_num = 4
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.leak_term = 3
+    c2.input_sum = 0
+  -> State: 2.40 <-
+    c1.P = 3
+    c1.r_num = 3
+    c1.raw_next = 5
+    c1.leak_term = 2
+  -> State: 2.41 <-
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c2.r_num = 3
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 5
+    c2.leak_term = 2
+    c2.input_sum = 3
+  -> State: 2.42 <-
+    stim = TRUE
+    c1.P = 0
+    c2.P = 5
+    c2.r_num = 0
+    c3.r_num = 3
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.spike = TRUE
+    c2.raw_next = 0
+    c2.leak_term = 0
+    c2.input_sum = 0
+    c3.raw_next = 5
+    c3.leak_term = 2
+    c3.input_sum = 3
+  -> State: 2.43 <-
+    c1.P = 3
+    c1.r_num = 3
+    c2.P = 0
+    c3.P = 5
+    c3.r_num = 0
+    c1.raw_next = 5
+    c1.leak_term = 2
+    c2.spike = FALSE
+    c3.spike = TRUE
+    c3.raw_next = 0
+    c3.leak_term = 0
+    c3.input_sum = 0
+    c4.raw_next = 3
+    c4.input_sum = 3
+  -> State: 2.44 <-
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c3.P = 0
+    c4.P = 3
+    c4.r_num = 4
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 3
+    c2.input_sum = 3
+    c3.spike = FALSE
+    c4.leak_term = 3
+    c4.input_sum = 0
+  -> State: 2.45 <-
+    stim = TRUE
+    c1.P = 0
+    c2.P = 3
+    c2.r_num = 4
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.leak_term = 3
+    c2.input_sum = 0
+  -> State: 2.46 <-
+    c1.P = 3
+    c1.r_num = 3
+    c1.raw_next = 5
+    c1.leak_term = 2
+  -> State: 2.47 <-
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c2.r_num = 3
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 5
+    c2.leak_term = 2
+    c2.input_sum = 3
+  -> State: 2.48 <-
+    stim = TRUE
+    c1.P = 0
+    c2.P = 5
+    c2.r_num = 0
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.spike = TRUE
+    c2.raw_next = 0
+    c2.leak_term = 0
+    c2.input_sum = 0
+    c3.raw_next = 3
+    c3.input_sum = 3
+  -> State: 2.49 <-
+    c1.P = 3
+    c1.r_num = 3
+    c2.P = 0
+    c3.P = 3
+    c3.r_num = 4
+    c1.raw_next = 5
+    c1.leak_term = 2
+    c2.spike = FALSE
+    c3.leak_term = 3
+    c3.input_sum = 0
+  -> State: 2.50 <-
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 3
+    c2.input_sum = 3
+  -> State: 2.51 <-
+    stim = TRUE
+    c1.P = 0
+    c2.P = 3
+    c2.r_num = 4
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.leak_term = 3
+    c2.input_sum = 0
+  -> State: 2.52 <-
+    c1.P = 3
+    c1.r_num = 3
+    c1.raw_next = 5
+    c1.leak_term = 2
+  -> State: 2.53 <-
+    stim = FALSE
+    c1.P = 5
+    c1.r_num = 0
+    c2.r_num = 3
+    c1.spike = TRUE
+    c1.raw_next = 0
+    c1.leak_term = 0
+    c1.input_sum = 0
+    c2.raw_next = 5
+    c2.leak_term = 2
+    c2.input_sum = 3
+  -> State: 2.54 <-
+    stim = TRUE
+    c1.P = 0
+    c2.P = 5
+    c2.r_num = 0
+    c3.r_num = 3
+    c1.spike = FALSE
+    c1.raw_next = 3
+    c1.input_sum = 3
+    c2.spike = TRUE
+    c2.raw_next = 0
+    c2.leak_term = 0
+    c2.input_sum = 0
+    c3.raw_next = 5
+    c3.leak_term = 2
+    c3.input_sum = 3
+  -> State: 2.55 <-
+    c1.P = 3
+    c1.r_num = 1
+    c2.P = 0
+    c3.P = 5
+    c3.r_num = 0
+    c4.r_num = 3
+    c2.spike = FALSE
+    c3.spike = TRUE
+    c3.raw_next = 0
+    c3.leak_term = 0
+    c3.input_sum = 0
+    c4.raw_next = 5
+    c4.leak_term = 2
+    c4.input_sum = 3
+  -> State: 2.56 <-
+    stim = FALSE
+    c1.r_num = 0
+    c3.P = 0
+    c4.P = 5
+    c4.r_num = 0
+    a.raw_next = 3
+    a.input_sum = 3
+    c1.raw_next = 0
+    c1.input_sum = 0
+    c3.spike = FALSE
+    c4.spike = TRUE
+    c4.raw_next = 0
+    c4.leak_term = 0
+    c4.input_sum = 0
+  -> State: 2.57 <-
+    a.P = 3
+    c1.P = 0
+    c4.P = 0
+    a.raw_next = 0
+    a.input_sum = 0
+    c4.spike = FALSE

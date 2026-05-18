@@ -1,0 +1,140 @@
+{
+  "neurons": [
+    "a",
+    "b",
+    "c1",
+    "c2",
+    "c3",
+    "c4",
+    "c5",
+    "c6"
+  ],
+  "inputs": [
+    "stim"
+  ],
+  "consts": {},
+  "edges": [
+    {
+      "src": "stim",
+      "dst": "c1",
+      "weight": 3
+    },
+    {
+      "src": "c1",
+      "dst": "c2",
+      "weight": 3
+    },
+    {
+      "src": "c2",
+      "dst": "c3",
+      "weight": 3
+    },
+    {
+      "src": "c3",
+      "dst": "c4",
+      "weight": 3
+    },
+    {
+      "src": "c4",
+      "dst": "c5",
+      "weight": 3
+    },
+    {
+      "src": "c5",
+      "dst": "c6",
+      "weight": 3
+    },
+    {
+      "src": "c4",
+      "dst": "a",
+      "weight": 3
+    },
+    {
+      "src": "a",
+      "dst": "b",
+      "weight": 3
+    },
+    {
+      "src": "b",
+      "dst": "a",
+      "weight": -3
+    }
+  ],
+  "params": {
+    "default": {
+      "tau": 4,
+      "w_exc": 3,
+      "w_inh": -3,
+      "S": 4,
+      "R_init": 2,
+      "Pmax": 10
+    }
+  },
+  "neuron_params": {
+    "a": "default",
+    "b": "default",
+    "c1": "default",
+    "c2": "default",
+    "c3": "default",
+    "c4": "default",
+    "c5": "default",
+    "c6": "default"
+  },
+  "compositions": [
+    {
+      "kind": "sequential",
+      "neurons": [
+        "c1",
+        "c2",
+        "c3",
+        "c4",
+        "c5",
+        "c6"
+      ],
+      "inferred": false
+    }
+  ],
+  "schedules": {
+    "stim": [
+      true,
+      true,
+      false,
+      true,
+      true,
+      false
+    ]
+  },
+  "user_specs": [],
+  "archetypes": [
+    {
+      "kind": "simple_series",
+      "nodes": [
+        "c1",
+        "c2",
+        "c3",
+        "c4",
+        "c5",
+        "c6"
+      ],
+      "inputs": {
+        "stim": "stim"
+      },
+      "meta": {},
+      "explicit": true
+    },
+    {
+      "kind": "negative_loop",
+      "nodes": [
+        "a",
+        "b"
+      ],
+      "inputs": {
+        "stim": "c4"
+      },
+      "meta": {},
+      "explicit": true
+    }
+  ],
+  "neuron_roles": {},
+  "input_ties": {}
+}

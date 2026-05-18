@@ -1,0 +1,72 @@
+-- ============================================================
+-- Neuronal Archetype: Negative loop
+-- Two neurons: A excites B, and B inhibits A, which can produce oscillations.
+-- ============================================================
+
+MODULE main
+VAR
+  -- Optional external stimulation to start the loop
+  t     : 0..20;
+  stimA : boolean;
+
+  n_A : lif_neuron(stimA, n_B.spike, t);  -- inhibition from n_B to n_A (negative weight)
+  n_B : lif_neuron(n_A.spike, FALSE, t);  -- excitation from n_A to n_B
+
+ASSIGN
+  init(t) := 0;
+  next(t) := (t < 20) ? (t + 1) : 20;
+  next(stimA) :=
+    case
+      t = 0 : TRUE;
+      t = 1 : FALSE;
+      t = 2 : TRUE;
+      t = 3 : TRUE;
+      TRUE  : {TRUE, FALSE};
+    esac;
+
+-- Mutual exclusion is a typical expectation (not guaranteed for all params,
+-- but often holds with reset semantics).
+CTLSPEC AG !(n_A.spike & n_B.spike)
+
+-- Reachability + propagation (robust under nondeterministic environment).
+CTLSPEC EF n_A.spike
+CTLSPEC EF n_B.spike
+CTLSPEC AG (n_A.spike -> EF n_B.spike)
+CTLSPEC AG (n_B.spike -> EF n_A.spike)
+
+
+MODULE lif_neuron(x_exc, x_inh, t)
+VAR
+  P : 0..10;
+  r_num : 0..4;
+
+DEFINE
+  Pmax := 10;
+  tau  := 4;
+  S := 4;
+
+  -- Same magnitude for excitation/inhibition to keep symmetry.
+  w_exc := 3;
+  w_inh := -3;
+
+  input_sum := (x_exc ? w_exc : 0) + (x_inh ? w_inh : 0);
+  leak_term := (r_num * P) / S;
+  raw_next  := leak_term + input_sum;
+  spike := (P >= tau);
+
+ASSIGN
+  init(P) := 0;
+  init(r_num) := 2;
+  next(r_num) :=
+    case
+      t < 4 : r_num;
+      TRUE  : 0..4;
+    esac;
+  next(P) :=
+    case
+      spike           : 0;
+      raw_next < 0    : 0;
+      raw_next > Pmax : Pmax;
+      TRUE            : raw_next;
+    esac;
+

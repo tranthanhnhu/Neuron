@@ -1,0 +1,34 @@
+-- Auto-generated properties (snn_mc.smv.properties)
+-- Splice after MODULE main ASSIGN block, before neuron submodule tail (lif_* or bool_thr).
+
+-- Baseline properties (generated)
+CTLSPEC AG (a.spike -> AX (a.P = 0))
+CTLSPEC AG ((a.P >= 0) & (a.P <= a.Pmax))
+CTLSPEC AG (b.spike -> AX (b.P = 0))
+CTLSPEC AG ((b.P >= 0) & (b.P <= b.Pmax))
+CTLSPEC AG (c1.spike -> AX (c1.P = 0))
+CTLSPEC AG ((c1.P >= 0) & (c1.P <= c1.Pmax))
+CTLSPEC AG (c2.spike -> AX (c2.P = 0))
+CTLSPEC AG ((c2.P >= 0) & (c2.P <= c2.Pmax))
+CTLSPEC AG (c3.spike -> AX (c3.P = 0))
+CTLSPEC AG ((c3.P >= 0) & (c3.P <= c3.Pmax))
+CTLSPEC AG (c4.spike -> AX (c4.P = 0))
+CTLSPEC AG ((c4.P >= 0) & (c4.P <= c4.Pmax))
+
+-- Composition properties (generated)
+-- Composition: sequential c1 -> c2 -> c3 -> c4
+CTLSPEC AG (c1.spike -> EF c2.spike)
+CTLSPEC AG (c2.spike -> EF c3.spike)
+CTLSPEC AG (c3.spike -> EF c4.spike)
+
+-- Archetype properties (auto-generated)
+-- From simple_series on nodes ['c1', 'c2', 'c3', 'c4']
+LTLSPEC (G (stim & (c1.r_num >= 2))) -> (F c4.spike)
+-- From negative_loop on nodes ['a', 'b']
+CTLSPEC AG !(a.spike & b.spike)
+CTLSPEC AG (a.spike -> EF b.spike)
+CTLSPEC EF a.spike
+CTLSPEC EF b.spike
+-- Oscillation candidates (may fail without tuning schedule or LIF params)
+LTLSPEC (G F (c4.spike)) -> ((G F (b.spike)) & (G F (!(b.spike))))
+LTLSPEC (G F (c4.spike)) -> ((G F (a.spike & !b.spike)) & (G F (!a.spike & b.spike)))

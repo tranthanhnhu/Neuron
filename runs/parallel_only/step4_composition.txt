@@ -1,0 +1,11 @@
+Step 4 - Composition
+====================
+
+Compositions:
+  - parallel  : out1, out2, out3
+
+Archetype instances:
+  [1] kind=parallel_composition  (explicit (block ...))
+        nodes = ['src', 'out1', 'out2', 'out3']
+        inputs = {'stim': 'stim'}
+        meta = {'src': 'src'}

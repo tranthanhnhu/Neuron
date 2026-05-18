@@ -1,0 +1,25 @@
+-- Auto-generated properties (snn_mc.smv.properties)
+-- Splice after MODULE main ASSIGN block, before neuron submodule tail (lif_* or bool_thr).
+
+-- Baseline properties (generated)
+CTLSPEC AG (n1.spike -> AX (n1.P = 0))
+CTLSPEC AG ((n1.P >= 0) & (n1.P <= n1.Pmax))
+CTLSPEC AG (n2.spike -> AX (n2.P = 0))
+CTLSPEC AG ((n2.P >= 0) & (n2.P <= n2.Pmax))
+CTLSPEC AG (n3.spike -> AX (n3.P = 0))
+CTLSPEC AG ((n3.P >= 0) & (n3.P <= n3.Pmax))
+CTLSPEC AG (n4.spike -> AX (n4.P = 0))
+CTLSPEC AG ((n4.P >= 0) & (n4.P <= n4.Pmax))
+CTLSPEC AG (n5.spike -> AX (n5.P = 0))
+CTLSPEC AG ((n5.P >= 0) & (n5.P <= n5.Pmax))
+
+-- Composition properties (generated)
+-- Composition: sequential n1 -> n2 -> n3 -> n4 -> n5
+CTLSPEC AG (n1.spike -> EF n2.spike)
+CTLSPEC AG (n2.spike -> EF n3.spike)
+CTLSPEC AG (n3.spike -> EF n4.spike)
+CTLSPEC AG (n4.spike -> EF n5.spike)
+
+-- Archetype properties (auto-generated)
+-- From simple_series on nodes ['n1', 'n2', 'n3', 'n4', 'n5']
+LTLSPEC (G (stim & (n1.r_num >= 2))) -> (F n5.spike)

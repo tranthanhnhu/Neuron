@@ -1,0 +1,10 @@
+Step 4 - Composition
+====================
+
+Compositions:
+  - sequential  : n1 -> n2 -> n3 -> n4 -> n5
+
+Archetype instances:
+  [1] kind=simple_series  (explicit (block ...))
+        nodes = ['n1', 'n2', 'n3', 'n4', 'n5']
+        inputs = {'stim': 'stim'}

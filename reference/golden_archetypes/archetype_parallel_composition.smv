@@ -1,0 +1,70 @@
+-- ============================================================
+-- Neuronal Archetype: Parallel composition
+-- A single common input neuron drives multiple downstream neurons.
+-- ============================================================
+
+MODULE main
+VAR
+  t    : 0..20;
+  stim : boolean;
+
+  src : lif_neuron(stim, FALSE, t);
+  a   : lif_neuron(src.spike, FALSE, t);
+  b   : lif_neuron(src.spike, FALSE, t);
+  c   : lif_neuron(src.spike, FALSE, t);
+
+ASSIGN
+  init(t) := 0;
+  next(t) := (t < 20) ? (t + 1) : 20;
+  next(stim) :=
+    case
+      t = 0 : TRUE;
+      t = 1 : FALSE;
+      t = 2 : TRUE;
+      t = 3 : TRUE;
+      TRUE  : {TRUE, FALSE};
+    esac;
+
+-- Sanity
+CTLSPEC EF src.spike
+CTLSPEC EF a.spike
+CTLSPEC EF b.spike
+CTLSPEC EF c.spike
+
+-- Conditional: continuous stimulation eventually produces spikes downstream.
+LTLSPEC (G (stim & (src.r_num >= 2))) -> (F (a.spike | b.spike | c.spike))
+
+
+MODULE lif_neuron(x_exc, x_inh, t)
+VAR
+  P : 0..10;
+  r_num : 0..4;
+
+DEFINE
+  Pmax := 10;
+  tau  := 4;
+  S := 4;
+  w_exc := 3;
+  w_inh := -3;
+
+  input_sum := (x_exc ? w_exc : 0) + (x_inh ? w_inh : 0);
+  leak_term := (r_num * P) / S;
+  raw_next  := leak_term + input_sum;
+  spike := (P >= tau);
+
+ASSIGN
+  init(P) := 0;
+  init(r_num) := 2;
+  next(r_num) :=
+    case
+      t < 4 : r_num;
+      TRUE  : 0..4;
+    esac;
+  next(P) :=
+    case
+      spike           : 0;
+      raw_next < 0    : 0;
+      raw_next > Pmax : Pmax;
+      TRUE            : raw_next;
+    esac;
+

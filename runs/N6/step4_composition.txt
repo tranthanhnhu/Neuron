@@ -1,0 +1,18 @@
+Step 4 - Composition
+====================
+
+Compositions:
+  - sequential  : c1 -> c2 -> c3 -> c4 -> c5 -> c6
+
+Archetype instances:
+  [1] kind=simple_series  (explicit (block ...))
+        nodes = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']
+        inputs = {'stim': 'stim'}
+  [2] kind=negative_loop  (explicit (block ...))
+        nodes = ['a', 'b']
+        inputs = {'stim': 'c4'}
+  [3] kind=parallel_composition  (graph-detected)
+        nodes = ['c4', 'a', 'c5']
+        meta = {'src': 'c4'}
+  [4] kind=simple_series  (graph-detected)
+        nodes = ['c1', 'c2', 'c3', 'c4']

@@ -1,0 +1,25 @@
+-- Auto-generated properties (snn_mc.smv.properties)
+-- Splice after MODULE main ASSIGN block, before neuron submodule tail (lif_* or bool_thr).
+
+-- Baseline properties (generated)
+CTLSPEC AG (out1.spike -> AX (out1.P = 0))
+CTLSPEC AG ((out1.P >= 0) & (out1.P <= out1.Pmax))
+CTLSPEC AG (out2.spike -> AX (out2.P = 0))
+CTLSPEC AG ((out2.P >= 0) & (out2.P <= out2.Pmax))
+CTLSPEC AG (out3.spike -> AX (out3.P = 0))
+CTLSPEC AG ((out3.P >= 0) & (out3.P <= out3.Pmax))
+CTLSPEC AG (src.spike -> AX (src.P = 0))
+CTLSPEC AG ((src.P >= 0) & (src.P <= src.Pmax))
+
+-- Composition properties (generated)
+-- Composition: parallel out1 out2 out3
+CTLSPEC EF out1.spike & EF out2.spike & EF out3.spike
+CTLSPEC EF (out1.spike & out2.spike & out3.spike)
+
+-- Archetype properties (auto-generated)
+-- From parallel_composition on nodes ['src', 'out1', 'out2', 'out3']
+CTLSPEC EF src.spike
+CTLSPEC EF out1.spike
+CTLSPEC EF out2.spike
+CTLSPEC EF out3.spike
+LTLSPEC (G (stim & (src.r_num >= 2))) -> (F (out1.spike | out2.spike | out3.spike))
