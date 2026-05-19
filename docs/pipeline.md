@@ -2,7 +2,7 @@
 
 This document tracks exactly what every CLI invocation produces for the supervisor.
 
-> For a detailed code walkthrough (which Python files and functions run, in Vietnamese), see [luong_chay_du_an.md](luong_chay_du_an.md).
+> For a detailed code walkthrough (which Python files and functions run), see [project_flow.md](project_flow.md) (English) or [luong_chay_du_an.md](luong_chay_du_an.md) (Vietnamese).
 
 ```mermaid
 flowchart TB

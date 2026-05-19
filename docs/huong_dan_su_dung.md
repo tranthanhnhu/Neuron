@@ -224,6 +224,7 @@ Test chạy `series_negloop.dsl` với `--skip-verify` và kiểm tra 6 file ste
 |------|----------|
 | [../README.md](../README.md) | Tổng quan package (tiếng Anh) |
 | **[luong_chay_du_an.md](luong_chay_du_an.md)** | **Luồng chạy chi tiết: file/hàm Python, sơ đồ, map step1–6 (cho người mới)** |
+| [project_flow.md](project_flow.md) | Same content in English |
 | [pipeline.md](pipeline.md) | 6 bước + sơ đồ Mermaid |
 | [parameterize_N.md](parameterize_N.md) | Tham số `N` trong DSL và CLI |
 | [../examples/](../examples/) | File `.dsl` mẫu |

@@ -2,6 +2,8 @@
 
 Tài liệu này dành cho **người mới**: mô tả luồng xử lý từ file `.dsl` đầu vào đến các file output, **đi qua module/hàm Python nào**, và **6 file step** tương ứng với từng giai đoạn demo.
 
+> **English version:** [project_flow.md](project_flow.md)
+
 > **Không nhầm với code cũ:** thư mục `NewStructure/` là pipeline mới (`snn_mc`). Code ở root repo (`main.py`, `dsl_generate_nusmv.py`, `smv_generator.py`, …) vẫn tồn tại làm tham chiếu; khi làm việc với dự án mới, chỉ cần quan tâm `NewStructure/`.
 
 ---
@@ -379,6 +381,7 @@ Mỗi archetype còn có `specs(inst)` sinh CTLSPEC/LTLSPEC (gọi từ `smv/pro
 
 | Tài liệu | Khi nào dùng |
 |----------|----------------|
+| [project_flow.md](project_flow.md) | Cùng nội dung, bản tiếng Anh |
 | [huong_dan_su_dung.md](huong_dan_su_dung.md) | Lệnh chạy, flag, cách đọc từng file output |
 | [pipeline.md](pipeline.md) | Tổng quan 6 bước (tiếng Anh, góc demo giáo sư) |
 | [parameterize_N.md](parameterize_N.md) | `N=/prefix=` và `--override N=` |
