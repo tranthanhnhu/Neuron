@@ -34,7 +34,7 @@ demo artifacts (`step1_*` ... `step6_*`) that the professor can step through.
 | `snn_mc/report/` | 6-step demo artifacts (diagram, IR, composition, properties, results) |
 | `examples/` | Demo DSL files (`series_negloop.dsl` is the main one) |
 | `reference/` | Hand-written `lif_neuron_6.smv` and 6 golden archetype SMV files |
-| `docs/` | `pipeline.md` (6 steps) and `parameterize_N.md` |
+| `docs/` | `luong_chay_du_an.md` (luồng code chi tiết, VN), `pipeline.md`, `parameterize_N.md`, `huong_dan_su_dung.md` |
 | `tests/` | Smoke test running the demo example with `--skip-verify` |
 
 ## Quickstart
