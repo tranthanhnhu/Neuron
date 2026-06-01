@@ -14,7 +14,9 @@ Supported lines (one per line, ``#`` starts a comment):
     schedule <input> values TRUE|FALSE ...           # forced trace prefix
     spec <CTLSPEC|LTLSPEC|INVARSPEC> <formula...>    # raw temporal-logic spec
     compose <sequential|parallel> n1 n2 [n3 ...]     # explicit composition
-    block <kind> key=value ...                       # archetype macro (see archetypes/)
+    horizon <int>                                      # simulation steps (NuSMV clock 0..horizon)
+    network_output <neuron>                            # declare network output port
+    block <kind> key=value ...                       # input output weights threshold N prefix ...
     chain from <input> prefix <p> count <n> [weight <int>] [params <set>]
 
 The parser also supports an optional CLI-time override for ``N`` inside ``block`` lines:
@@ -29,6 +31,11 @@ from typing import Dict, List, Optional, Set, Tuple
 
 from snn_mc.archetypes import BLOCK_REGISTRY
 from snn_mc.archetypes.base import BlockApplyContext
+from snn_mc.archetypes.block_helpers import (
+    apply_threshold_to_neurons,
+    normalize_block_kv,
+    suggest_block_kind,
+)
 from snn_mc.ir import (
     ArchetypeInstance,
     Composition,
@@ -129,6 +136,8 @@ def _parse_body(text: str, *, override_n: Optional[int]) -> NetworkIR:
     strict_two_port = False
     neuron_roles: Dict[str, str] = {}
     input_ties: Dict[str, str] = {}
+    horizon = 20
+    network_outputs: List[str] = []
 
     # The default LIF parameter set matches the values fixed with the supervisor.
     params["default"] = ParamSpec(
@@ -211,6 +220,16 @@ def _parse_body(text: str, *, override_n: Optional[int]) -> NetworkIR:
                     raise ValueError(f"line {line_no}: neuron optional arg must be params=<name>")
                 pset = kv["params"]
             neuron_params[n] = pset
+            continue
+
+        if head == "horizon" and len(toks) == 2:
+            horizon = int(toks[1])
+            if horizon < 1:
+                raise ValueError(f"line {line_no}: horizon must be >= 1")
+            continue
+
+        if head == "network_output" and len(toks) >= 2:
+            network_outputs.extend(toks[1:])
             continue
 
         if head == "input" and len(toks) == 2:
@@ -328,12 +347,13 @@ def _parse_body(text: str, *, override_n: Optional[int]) -> NetworkIR:
             if len(toks) < 2:
                 raise ValueError(f"line {line_no}: block requires a kind")
             kind = toks[1]
-            kv = parse_kv_pairs(toks[2:]) if len(toks) > 2 else {}
+            kv = normalize_block_kv(parse_kv_pairs(toks[2:]) if len(toks) > 2 else {})
             if override_n is not None and "N" in kv:
                 # CLI ``--override N=10`` rewrites the in-DSL N for every block that uses it.
                 kv["N"] = str(override_n)
             if kind not in BLOCK_REGISTRY:
-                raise ValueError(f"line {line_no}: unknown block kind '{kind}'")
+                hint = suggest_block_kind(kind, list(BLOCK_REGISTRY.keys()))
+                raise ValueError(f"line {line_no}: unknown block kind '{kind}'. {hint}")
             block_cls = BLOCK_REGISTRY[kind]
 
             def get(name: str, default: Optional[str] = None) -> str:
@@ -347,8 +367,13 @@ def _parse_body(text: str, *, override_n: Optional[int]) -> NetworkIR:
                 return int(kv[name]) if name in kv else default
 
             pset = get("params", "default")
-            w_exc = get_int("weight", 3)
-            w_inh = -abs(get_int("inh_weight", abs(w_exc)))
+            w_exc = get_int("weight", params["default"].w_exc)
+            w_inh = -abs(get_int("inh_weight", abs(params["default"].w_inh)))
+
+            def apply_threshold(neuron_names: List[str], param_set: str, threshold: Optional[int]) -> None:
+                for n in neuron_names:
+                    neurons.add(n)
+                apply_threshold_to_neurons(params, neuron_params, neuron_names, param_set, threshold)
 
             ctx = BlockApplyContext(
                 line_no=line_no,
@@ -361,8 +386,13 @@ def _parse_body(text: str, *, override_n: Optional[int]) -> NetworkIR:
                 get=get,
                 get_int=get_int,
                 parse_csv_list=lambda val, ln=line_no: parse_csv_list(val, ln),
+                params=params,
+                neuron_params=neuron_params,
+                apply_threshold=apply_threshold,
             )
             block_cls.apply_block(kv, ctx)
+            if archetypes and archetypes[-1].explicit and "output" in archetypes[-1].meta:
+                network_outputs.append(archetypes[-1].meta["output"])
             if "roles" in kv and archetypes:
                 last = archetypes[-1]
                 if last.explicit:
@@ -393,6 +423,11 @@ def _parse_body(text: str, *, override_n: Optional[int]) -> NetworkIR:
 
     _validate_input_ties(input_ties, inputs, schedules)
 
+    if not network_outputs:
+        for a in archetypes:
+            if a.explicit and a.meta.get("output"):
+                network_outputs.append(a.meta["output"])
+
     return NetworkIR(
         neurons=neurons,
         inputs=inputs,
@@ -412,6 +447,8 @@ def _parse_body(text: str, *, override_n: Optional[int]) -> NetworkIR:
         instance_wires=(),
         instance_wire_edges=(),
         input_ties=dict(input_ties),
+        horizon=horizon,
+        network_outputs=tuple(dict.fromkeys(network_outputs)),
     )
 
 

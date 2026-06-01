@@ -2,6 +2,8 @@
 
 Tài liệu này mô tả cách **chạy pipeline** và **đọc kết quả** cho package `snn_mc` trong thư mục `NewStructure/`.
 
+Đặc tả DSL đầy đủ (cú pháp, ngữ nghĩa, expressiveness): [dsl_spec.md](dsl_spec.md).
+
 ---
 
 ## 1. Chuẩn bị

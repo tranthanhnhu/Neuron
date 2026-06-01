@@ -89,6 +89,7 @@ class ParallelCompositionArchetype(ArchetypeBase):
         inst: ArchetypeInstance,
         *,
         neurons: Optional[FrozenSet[str]] = None,
+        horizon: int = 20,
     ) -> List[str]:
         """OUTPUT: per-output reachability + liveness when the source spikes."""
         ns = inst.nodes

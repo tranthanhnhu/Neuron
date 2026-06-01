@@ -2,8 +2,8 @@
 simple_series — linear chain of N neurons fed by one input.
 
 DSL forms (interchangeable):
-    block simple_series input=stim neurons=n1,n2,n3        params=default
-    block simple_series input=stim N=3   prefix=n          params=default
+    block simple_series input=stim output=c4 neurons=n1,n2,n3        params=default
+    block simple_series input=stim N=3   prefix=n  weights=3,2,5    threshold=4
 
 Auto-properties:
     LTLSPEC (G (stim & (first.r_num >= 2))) -> (F last.spike)
@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from typing import Dict, FrozenSet, List, Optional
 
+from snn_mc.archetypes.block_helpers import exc_weights_for_chain, resolve_block_output
 from snn_mc.ir import ArchetypeInstance, Composition, Edge
 from snn_mc.archetypes.base import (
     ArchetypeBase,
@@ -28,19 +29,23 @@ class SimpleSeriesArchetype(ArchetypeBase):
 
     @classmethod
     def apply_block(cls, kv: Dict[str, str], ctx: BlockApplyContext) -> None:
-        """
-        INPUT: ``kv`` with ``input=`` (required) and either ``neurons=`` or ``N=/prefix=``.
-        OUTPUT: appends edges (stim->n1, n1->n2, ..., nN-1->nN), one sequential composition,
-                and one explicit ArchetypeInstance to ``ctx``.
-        """
         pset = ctx.get("params", "default")
         stim = ctx.get("input", None)
         ns = expand_chain(kv, ctx, what="block simple_series")
-        for n in ns:
-            ctx.ensure_neuron(n, pset)
-        ctx.edges.append(Edge(src=stim, dst=ns[0], weight=ctx.w_exc))
-        for a, b in zip(ns, ns[1:]):
-            ctx.edges.append(Edge(src=a, dst=b, weight=ctx.w_exc))
+        threshold: Optional[int] = None
+        if "threshold" in kv:
+            threshold = int(kv["threshold"])
+        ctx.apply_threshold(ns, pset, threshold)
+        out_port = resolve_block_output(kv, ns, line_no=ctx.line_no, what="block simple_series")
+
+        edge_pairs: List[tuple[str, str]] = [(stim, ns[0])]
+        edge_pairs.extend(zip(ns, ns[1:]))
+        weights = exc_weights_for_chain(
+            kv, ctx.line_no, len(edge_pairs), ctx.w_exc, what="block simple_series"
+        )
+        for (src, dst), w in zip(edge_pairs, weights):
+            ctx.edges.append(Edge(src=src, dst=dst, weight=w))
+
         if len(ns) >= 2:
             ctx.compositions.append(
                 Composition(kind="sequential", neurons=tuple(ns), inferred=False)
@@ -50,7 +55,7 @@ class SimpleSeriesArchetype(ArchetypeBase):
                 kind=cls.kind,
                 nodes=tuple(ns),
                 inputs={"stim": stim},
-                meta={},
+                meta={"output": out_port},
                 explicit=True,
             )
         )
@@ -61,8 +66,8 @@ class SimpleSeriesArchetype(ArchetypeBase):
         inst: ArchetypeInstance,
         *,
         neurons: Optional[FrozenSet[str]] = None,
+        horizon: int = 20,
     ) -> List[str]:
-        """OUTPUT: liveness — sustained input eventually drives the last neuron to spike."""
         ns = inst.nodes
         stim = stim_token(inst.inputs.get("stim"), neurons)
         if stim and len(ns) >= 2:
@@ -72,7 +77,6 @@ class SimpleSeriesArchetype(ArchetypeBase):
 
     @classmethod
     def detect(cls, idx: GraphIndex) -> List[ArchetypeInstance]:
-        """OUTPUT: every maximal indeg=1/outdeg=1 excitatory chain (length >= 2)."""
         insts: List[ArchetypeInstance] = []
         indeg = {n: 0 for n in idx.neurons}
         outdeg = {n: 0 for n in idx.neurons}
@@ -99,7 +103,7 @@ class SimpleSeriesArchetype(ArchetypeBase):
                         kind=cls.kind,
                         nodes=tuple(chain),
                         inputs={},
-                        meta={},
+                        meta={"output": chain[-1]},
                         explicit=False,
                     )
                 )

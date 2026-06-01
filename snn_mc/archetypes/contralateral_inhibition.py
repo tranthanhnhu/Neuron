@@ -78,6 +78,7 @@ class ContralateralInhibitionArchetype(ArchetypeBase):
         inst: ArchetypeInstance,
         *,
         neurons: Optional[FrozenSet[str]] = None,
+        horizon: int = 20,
     ) -> List[str]:
         """OUTPUT: pairwise mutual exclusion + a steady-winner reachability for each neuron."""
         ns = list(inst.nodes)

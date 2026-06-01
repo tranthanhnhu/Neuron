@@ -54,6 +54,8 @@ def ir_to_dict(ir: NetworkIR) -> Dict[str, Any]:
         ],
         "neuron_roles": dict(sorted(ir.neuron_roles.items())),
         "input_ties": dict(sorted(ir.input_ties.items())),
+        "horizon": ir.horizon,
+        "network_outputs": list(ir.network_outputs),
     }
 
 

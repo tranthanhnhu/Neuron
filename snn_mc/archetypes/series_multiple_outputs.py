@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from typing import Dict, FrozenSet, List, Optional
 
+from snn_mc.archetypes.block_helpers import exc_weights_for_chain
 from snn_mc.ir import ArchetypeInstance, Composition, Edge
 from snn_mc.archetypes.base import ArchetypeBase, BlockApplyContext, expand_chain, stim_token
 from snn_mc.archetypes.graph_index import GraphIndex
@@ -24,11 +25,14 @@ class SeriesMultipleOutputsArchetype(ArchetypeBase):
         pset = ctx.get("params", "default")
         stim = ctx.get("input", None)
         ns = expand_chain(kv, ctx, what="block series_multiple_outputs")
-        for n in ns:
-            ctx.ensure_neuron(n, pset)
-        ctx.edges.append(Edge(src=stim, dst=ns[0], weight=ctx.w_exc))
-        for a, b in zip(ns, ns[1:]):
-            ctx.edges.append(Edge(src=a, dst=b, weight=ctx.w_exc))
+        threshold = int(kv["threshold"]) if "threshold" in kv else None
+        ctx.apply_threshold(ns, pset, threshold)
+        edge_pairs = [(stim, ns[0])] + list(zip(ns, ns[1:]))
+        weights = exc_weights_for_chain(
+            kv, ctx.line_no, len(edge_pairs), ctx.w_exc, what="block series_multiple_outputs"
+        )
+        for (src, dst), w in zip(edge_pairs, weights):
+            ctx.edges.append(Edge(src=src, dst=dst, weight=w))
         if len(ns) >= 2:
             ctx.compositions.append(
                 Composition(kind="sequential", neurons=tuple(ns), inferred=False)
@@ -38,7 +42,7 @@ class SeriesMultipleOutputsArchetype(ArchetypeBase):
                 kind=cls.kind,
                 nodes=tuple(ns),
                 inputs={"stim": stim},
-                meta={},
+                meta={"output": ",".join(ns)},
                 explicit=True,
             )
         )
@@ -49,6 +53,7 @@ class SeriesMultipleOutputsArchetype(ArchetypeBase):
         inst: ArchetypeInstance,
         *,
         neurons: Optional[FrozenSet[str]] = None,
+        horizon: int = 20,
     ) -> List[str]:
         """OUTPUT: per-neuron reachability + global silence when stim is off."""
         ns = inst.nodes

@@ -18,7 +18,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Callable, Dict, FrozenSet, List, Optional
 
-from snn_mc.ir import ArchetypeInstance, Composition, Edge
+from snn_mc.ir import ArchetypeInstance, Composition, Edge, ParamSpec
 from snn_mc.archetypes.graph_index import GraphIndex
 
 
@@ -80,6 +80,9 @@ class BlockApplyContext:
     get: Callable[[str, Optional[str]], str]
     get_int: Callable[[str, int], int]
     parse_csv_list: Callable[[str], List[str]]
+    params: Dict[str, "ParamSpec"]  # noqa: F821 — forward ref
+    neuron_params: Dict[str, str]
+    apply_threshold: Callable[[List[str], str, Optional[int]], None]
 
 
 def expand_chain(
@@ -151,6 +154,7 @@ class ArchetypeBase(ABC):
         inst: ArchetypeInstance,
         *,
         neurons: Optional[FrozenSet[str]] = None,
+        horizon: int = 20,
     ) -> List[str]:
         """
         INPUT: matched archetype instance and (optionally) the set of neuron names so that

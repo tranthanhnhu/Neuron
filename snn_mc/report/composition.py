@@ -40,8 +40,12 @@ def render_step4(ir: NetworkIR, prepared: SmvPrepared) -> str:
         lines.append(f"        nodes = {list(inst.nodes)}")
         if inst.inputs:
             lines.append(f"        inputs = {dict(inst.inputs)}")
+        if inst.meta.get("output"):
+            lines.append(f"        output = {inst.meta['output']!r}")
         if inst.meta:
-            lines.append(f"        meta = {dict(inst.meta)}")
+            extra = {k: v for k, v in inst.meta.items() if k != "output"}
+            if extra:
+                lines.append(f"        meta = {extra}")
 
     if ir.neuron_roles:
         lines.append("")

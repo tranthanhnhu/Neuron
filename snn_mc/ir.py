@@ -146,6 +146,37 @@ class NetworkIR:
     instance_wire_edges: Tuple[Edge, ...] = ()
     # Slave input -> master input. Emitter writes slave as a DEFINE alias instead of a VAR.
     input_ties: Dict[str, str] = field(default_factory=dict)
+    # Discrete simulation horizon: global clock ``t`` ranges ``0..horizon`` in NuSMV.
+    horizon: int = 20
+    # Declared network-level output neurons (observation / composition ports).
+    network_outputs: Tuple[str, ...] = ()
+
+
+def clone_param_with_tau(
+    params: Dict[str, ParamSpec],
+    base_name: str,
+    tau: int,
+) -> str:
+    """
+    Ensure a ParamSpec named ``{base_name}_tau{tau}`` exists (copy of ``base_name`` with new tau).
+    OUTPUT: param-set name to attach to neurons.
+    """
+    key = f"{base_name}_tau{tau}"
+    if key in params:
+        return key
+    if base_name not in params:
+        raise ValueError(f"Unknown param-set '{base_name}'")
+    b = params[base_name]
+    params[key] = ParamSpec(
+        name=key,
+        tau=tau,
+        w_exc=b.w_exc,
+        w_inh=b.w_inh,
+        S=b.S,
+        R_init=b.R_init,
+        Pmax=b.Pmax,
+    )
+    return key
 
 
 def parse_kv_pairs(tokens: List[str]) -> Dict[str, str]:
@@ -210,6 +241,8 @@ def merge_network_ir(base: NetworkIR, extra: NetworkIR) -> NetworkIR:
         instance_wires=tuple(base.instance_wires) + tuple(extra.instance_wires),
         instance_wire_edges=tuple(base.instance_wire_edges) + tuple(extra.instance_wire_edges),
         input_ties={**base.input_ties, **extra.input_ties},
+        horizon=extra.horizon if extra.horizon != 20 else base.horizon,
+        network_outputs=tuple(dict.fromkeys((*base.network_outputs, *extra.network_outputs))),
     )
 
 
@@ -280,6 +313,8 @@ def apply_prefix_to_ir(ir: NetworkIR, prefix: str) -> Tuple[NetworkIR, Dict[str,
             instance_wires=(),
             instance_wire_edges=(),
             input_ties=dict(ir.input_ties),
+            horizon=ir.horizon,
+            network_outputs=tuple(rn(n) for n in ir.network_outputs),
         ),
         mapping,
     )

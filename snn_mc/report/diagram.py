@@ -23,10 +23,14 @@ def render_mermaid(ir: NetworkIR) -> str:
     """
     lines: List[str] = ["```mermaid", "flowchart LR"]
     # Declare nodes first (inputs as rectangles, neurons as circles).
+    out_set = set(ir.network_outputs)
     for inp in sorted(ir.inputs):
         lines.append(f"  {_safe_id(inp)}[\"{inp} (input)\"]")
     for n in sorted(ir.neurons):
-        lines.append(f"  {_safe_id(n)}(({n}))")
+        if n in out_set:
+            lines.append(f"  {_safe_id(n)}[\"{n} (output)\"]")
+        else:
+            lines.append(f"  {_safe_id(n)}(({n}))")
     # Then declare edges.
     for e in ir.edges:
         if e.weight >= 0:

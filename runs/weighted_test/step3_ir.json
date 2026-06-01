@@ -1,0 +1,139 @@
+{
+  "neurons": [
+    "a",
+    "b",
+    "c1",
+    "c2",
+    "c3",
+    "c4"
+  ],
+  "inputs": [
+    "stim"
+  ],
+  "consts": {},
+  "edges": [
+    {
+      "src": "stim",
+      "dst": "c1",
+      "weight": 3
+    },
+    {
+      "src": "c1",
+      "dst": "c2",
+      "weight": 2
+    },
+    {
+      "src": "c2",
+      "dst": "c3",
+      "weight": 5
+    },
+    {
+      "src": "c3",
+      "dst": "c4",
+      "weight": 4
+    },
+    {
+      "src": "c4",
+      "dst": "a",
+      "weight": 4
+    },
+    {
+      "src": "a",
+      "dst": "b",
+      "weight": 2
+    },
+    {
+      "src": "b",
+      "dst": "a",
+      "weight": -3
+    }
+  ],
+  "params": {
+    "default": {
+      "tau": 4,
+      "w_exc": 3,
+      "w_inh": -3,
+      "S": 4,
+      "R_init": 2,
+      "Pmax": 10
+    },
+    "default_tau4": {
+      "tau": 4,
+      "w_exc": 3,
+      "w_inh": -3,
+      "S": 4,
+      "R_init": 2,
+      "Pmax": 10
+    }
+  },
+  "neuron_params": {
+    "a": "default_tau4",
+    "b": "default_tau4",
+    "c1": "default_tau4",
+    "c2": "default_tau4",
+    "c3": "default_tau4",
+    "c4": "default_tau4"
+  },
+  "compositions": [
+    {
+      "kind": "sequential",
+      "neurons": [
+        "c1",
+        "c2",
+        "c3",
+        "c4"
+      ],
+      "inferred": false
+    }
+  ],
+  "schedules": {
+    "stim": [
+      true,
+      true,
+      false,
+      true,
+      true,
+      false
+    ]
+  },
+  "user_specs": [],
+  "archetypes": [
+    {
+      "kind": "simple_series",
+      "nodes": [
+        "c1",
+        "c2",
+        "c3",
+        "c4"
+      ],
+      "inputs": {
+        "stim": "stim"
+      },
+      "meta": {
+        "output": "c4"
+      },
+      "explicit": true
+    },
+    {
+      "kind": "negative_loop",
+      "nodes": [
+        "a",
+        "b"
+      ],
+      "inputs": {
+        "stim": "c4"
+      },
+      "meta": {
+        "output": "b"
+      },
+      "explicit": true
+    }
+  ],
+  "neuron_roles": {},
+  "input_ties": {},
+  "horizon": 24,
+  "network_outputs": [
+    "c4",
+    "b"
+  ]
+}

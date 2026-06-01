@@ -49,6 +49,7 @@ class InhibitionOfBehaviorArchetype(ArchetypeBase):
         inst: ArchetypeInstance,
         *,
         neurons: Optional[FrozenSet[str]] = None,
+        horizon: int = 20,
     ) -> List[str]:
         """OUTPUT: when I is active, T stays silent; when I is silent and stimT is sustained, T eventually spikes."""
         ns = inst.nodes

@@ -2,17 +2,18 @@
 negative_loop — N neurons chained excitatorily with an inhibitory back-edge that closes the loop.
 
 DSL forms:
-    block negative_loop input=stim A=a B=b                params=default        # 2-neuron loop
-    block negative_loop input=stim neurons=a,b,c          params=default        # N-neuron loop
-    block negative_loop input=stim N=3 prefix=r           params=default        # generated names
-
-Wiring: stim -> n1 -> n2 -> ... -> nN  and  nN -|inh|- n1.
+    block negative_loop input=c4 output=b A=a B=b exc_weights=3,3 inh_weight=3 threshold=4
 """
 
 from __future__ import annotations
 
 from typing import Dict, FrozenSet, List, Optional, Set, Tuple
 
+from snn_mc.archetypes.block_helpers import (
+    exc_weights_for_chain,
+    inh_weight_from_kv,
+    resolve_block_output,
+)
 from snn_mc.ir import ArchetypeInstance, Edge
 from snn_mc.archetypes.base import (
     ArchetypeBase,
@@ -30,7 +31,6 @@ def _longest_simple_exc_path(
     exc_adj: Dict[str, List[str]],
     max_vertices: int,
 ) -> Optional[Tuple[str, ...]]:
-    """DFS that returns the longest simple excitatory path from ``start`` to ``goal``."""
     best: Optional[Tuple[str, ...]] = None
 
     def dfs(cur: str, visited: Set[str], path: List[str]) -> None:
@@ -55,13 +55,6 @@ class NegativeLoopArchetype(ArchetypeBase):
 
     @classmethod
     def apply_block(cls, kv: Dict[str, str], ctx: BlockApplyContext) -> None:
-        """
-        Accept three equivalent forms:
-          1. ``A=<x> B=<y>`` (two-neuron loop — legacy convenience).
-          2. ``neurons=n1,n2,...``.
-          3. ``N=<int> prefix=<str>`` (parameterized).
-        OUTPUT: excitatory chain edges + one inhibitory back-edge from last to first.
-        """
         pset = ctx.get("params", "default")
         stim = ctx.get("input", None)
         has_ab = "A" in kv or "B" in kv
@@ -80,19 +73,32 @@ class NegativeLoopArchetype(ArchetypeBase):
         else:
             ns_list = expand_chain(kv, ctx, what="block negative_loop")
 
-        for n in ns_list:
-            ctx.ensure_neuron(n, pset)
-        ctx.edges.append(Edge(src=stim, dst=ns_list[0], weight=ctx.w_exc))
-        for a, b in zip(ns_list, ns_list[1:]):
-            ctx.edges.append(Edge(src=a, dst=b, weight=ctx.w_exc))
-        # Closing inhibitory edge — the feedback that gives the loop its negative-loop name.
-        ctx.edges.append(Edge(src=ns_list[-1], dst=ns_list[0], weight=ctx.w_inh))
+        threshold: Optional[int] = int(kv["threshold"]) if "threshold" in kv else None
+        ctx.apply_threshold(ns_list, pset, threshold)
+        out_port = resolve_block_output(
+            kv, ns_list, line_no=ctx.line_no, what="block negative_loop"
+        )
+
+        exc_edges: List[tuple[str, str]] = [(stim, ns_list[0])]
+        exc_edges.extend(zip(ns_list, ns_list[1:]))
+        exc_ws = exc_weights_for_chain(
+            kv, ctx.line_no, len(exc_edges), ctx.w_exc, what="block negative_loop"
+        )
+        for (src, dst), w in zip(exc_edges, exc_ws):
+            ctx.edges.append(Edge(src=src, dst=dst, weight=w))
+        ctx.edges.append(
+            Edge(
+                src=ns_list[-1],
+                dst=ns_list[0],
+                weight=inh_weight_from_kv(kv, ctx.w_inh),
+            )
+        )
         ctx.archetypes.append(
             ArchetypeInstance(
                 kind=cls.kind,
                 nodes=tuple(ns_list),
                 inputs={"stim": stim},
-                meta={},
+                meta={"output": out_port},
                 explicit=True,
             )
         )
@@ -103,43 +109,34 @@ class NegativeLoopArchetype(ArchetypeBase):
         inst: ArchetypeInstance,
         *,
         neurons: Optional[FrozenSet[str]] = None,
+        horizon: int = 20,
     ) -> List[str]:
-        """
-        OUTPUT: mutual exclusion of first/last, forward reachability, per-neuron liveness,
-                and optional oscillation candidates that depend on schedule tuning.
-        """
         ns = inst.nodes
         if len(ns) < 2:
             return []
         n_first, n_last = ns[0], ns[-1]
+        h = horizon
         specs: List[str] = [
             f"CTLSPEC AG !({n_first}.spike & {n_last}.spike)",
         ]
         for i in range(len(ns) - 1):
-            specs.append(f"CTLSPEC AG ({ns[i]}.spike -> EF {ns[i + 1]}.spike)")
+            specs.append(
+                f"LTLSPEC G (({ns[i]}.spike & t < {h}) -> (F (t <= {h} & {ns[i + 1]}.spike)))"
+            )
         for n in ns:
             specs.append(f"CTLSPEC EF {n}.spike")
         stim = stim_token(inst.inputs.get("stim"), neurons)
-        if stim:
-            # NuSMV's parser dislikes the glued ``GF`` token in front of a dotted name
-            # (e.g. ``GF c4.spike``); use the spelled-out ``G F (...)`` form everywhere
-            # so the same template renders for both inputs and submodule references.
+        if stim and len(ns) == 2:
             specs.append(
-                "-- Oscillation candidates (may fail without tuning schedule or LIF params)"
+                "-- Bounded alternation (optional; tune schedule / LIF if this fails)"
             )
             specs.append(
-                f"LTLSPEC (G F ({stim})) -> ((G F ({n_last}.spike)) & (G F (!({n_last}.spike))))"
+                f"LTLSPEC G (({stim} & t < {h}) -> F (t <= {h} & {n_last}.spike & !{n_first}.spike))"
             )
-            if len(ns) == 2:
-                specs.append(
-                    f"LTLSPEC (G F ({stim})) -> ((G F ({n_first}.spike & !{n_last}.spike)) "
-                    f"& (G F (!{n_first}.spike & {n_last}.spike)))"
-                )
         return specs
 
     @classmethod
     def detect(cls, idx: GraphIndex) -> List[ArchetypeInstance]:
-        """Find chains whose end inhibits the start (and whose start is excited from an input)."""
         insts: List[ArchetypeInstance] = []
         for b_inhib, a_target in idx.inh:
             if b_inhib not in idx.neurons or a_target not in idx.neurons:
@@ -156,7 +153,7 @@ class NegativeLoopArchetype(ArchetypeBase):
                     kind=cls.kind,
                     nodes=path,
                     inputs={},
-                    meta={},
+                    meta={"output": path[-1]},
                     explicit=False,
                 )
             )

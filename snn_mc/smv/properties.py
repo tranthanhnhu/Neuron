@@ -87,7 +87,7 @@ def emit_properties_block(
         # Pass the neuron set so each archetype can rewrite ``stim`` -> ``c4.spike`` when
         # an archetype's ``input=`` actually refers to a neuron (e.g. chain output) rather
         # than a true DSL input.
-        block = archetype_specs(it, neurons=prepared.neurons)
+        block = archetype_specs(it, neurons=prepared.neurons, horizon=ir.horizon)
         if block:
             auto.append(f"-- From {it.kind} on nodes {list(it.nodes)}")
             auto.extend(block)

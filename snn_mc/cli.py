@@ -156,6 +156,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     summary = None
     nusmv_rc: Optional[int] = None
     counterexample: Optional[str] = None
+    verify_exit: Optional[int] = None
     if args.skip_verify:
         print("[INFO] verification skipped (--skip-verify)")
     else:
@@ -164,18 +165,19 @@ def main(argv: Optional[list[str]] = None) -> int:
             nusmv_rc, log_text = run_nusmv(combined_path, log_path, nusmv_exe=nusmv_exe)
         except FileNotFoundError as exc:
             print(f"[ERR] {exc}", file=sys.stderr)
-            return 3
-        print(f"[OK] NuSMV exit={nusmv_rc}, log={log_path}")
-        summary = summarize_nusmv_output(log_text)
-        print(f"[RESULT] true={summary.true_count} false={summary.false_count}")
-        if summary.false_count > 0:
-            counterexample = extract_counterexample_block(log_text)
-            if counterexample:
-                ce_path = out_dir / "counterexample_snippet.txt"
-                ce_path.write_text(counterexample, encoding="utf-8")
-                print(f"[INFO] counterexample snippet: {ce_path}")
+            verify_exit = 3
+        else:
+            print(f"[OK] NuSMV exit={nusmv_rc}, log={log_path}")
+            summary = summarize_nusmv_output(log_text)
+            print(f"[RESULT] true={summary.true_count} false={summary.false_count}")
+            if summary.false_count > 0:
+                counterexample = extract_counterexample_block(log_text)
+                if counterexample:
+                    ce_path = out_dir / "counterexample_snippet.txt"
+                    ce_path.write_text(counterexample, encoding="utf-8")
+                    print(f"[INFO] counterexample snippet: {ce_path}")
 
-    # --- Stage 8: always write the six demo step files (before any early returns) ---
+    # --- Stage 8: always write the six demo step files (even if NuSMV was missing) ---
     step_files = write_all_steps(
         out_dir=out_dir,
         ir=ir,
@@ -190,6 +192,9 @@ def main(argv: Optional[list[str]] = None) -> int:
     )
     for label, path in step_files:
         _print_section(label, path)
+
+    if verify_exit is not None:
+        return verify_exit
 
     if args.skip_verify:
         return 0

@@ -31,8 +31,25 @@ def compose(ir: NetworkIR) -> NetworkIR:
     RAISES: ValueError if a block references an unknown name, or roles disagree with wiring.
     """
     _validate_block_inputs(ir)
+    _validate_outputs(ir)
     _validate_roles_vs_archetypes(ir)
     return ir
+
+
+def _validate_outputs(ir: NetworkIR) -> None:
+    """Every declared network or block output must name a known neuron."""
+    valid = set(ir.neurons) | set(ir.inputs) | set(ir.consts.keys())
+    for out in ir.network_outputs:
+        if out not in valid:
+            raise ValueError(
+                f"compose: network output '{out}' is unknown; declare it as a neuron first."
+            )
+    for inst in ir.archetypes:
+        out = inst.meta.get("output")
+        if out and out not in valid:
+            raise ValueError(
+                f"compose: archetype '{inst.kind}' output '{out}' is not a declared neuron."
+            )
 
 
 def _validate_block_inputs(ir: NetworkIR) -> None:

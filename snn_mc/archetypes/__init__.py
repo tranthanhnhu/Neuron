@@ -65,6 +65,7 @@ def archetype_specs(
     inst: ArchetypeInstance,
     *,
     neurons: Optional[FrozenSet[str]] = None,
+    horizon: int = 20,
 ) -> List[str]:
     """
     INPUT: an ArchetypeInstance and (optionally) the neuron name set used by ``stim_token``.
@@ -73,7 +74,7 @@ def archetype_specs(
     cls = BLOCK_REGISTRY.get(inst.kind)
     if cls is None:
         return []
-    return cls.specs(inst, neurons=neurons)
+    return cls.specs(inst, neurons=neurons, horizon=horizon)
 
 
 def detect_archetypes(
