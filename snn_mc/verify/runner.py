@@ -8,22 +8,49 @@ Public API:
 
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 from pathlib import Path
 from typing import Optional, Tuple
 
+_PKG_ROOT = Path(__file__).resolve().parents[2]  # NewStructure/
+
+
+def _local_nusmv_candidates() -> list[Path]:
+    """Bundled or manually unpacked NuSMV under ``tools/nusmv/`` (see tools/README.md)."""
+    base = _PKG_ROOT / "tools" / "nusmv"
+    if not base.is_dir():
+        return []
+    found: list[Path] = []
+    for name in ("NuSMV.exe", "nusmv", "NuSMV"):
+        found.extend(sorted(base.rglob(name)))
+    return found
+
 
 def find_nusmv() -> str:
     """
     INPUT: nothing.
-    OUTPUT: full path to the first NuSMV binary found on PATH, or the literal name otherwise.
-            Windows builds typically expose ``NuSMV.exe``; Linux/macOS ``nusmv``.
+    OUTPUT: full path to the first NuSMV binary found, or the literal name ``NuSMV`` on miss.
+
+    Search order: ``SNN_MC_NUSMV`` env, PATH (``nusmv`` / ``NuSMV``), then ``tools/nusmv/**/bin``.
+    Windows builds typically expose ``NuSMV.exe``; Linux/macOS ``nusmv``.
     """
+    env = os.environ.get("SNN_MC_NUSMV")
+    if env:
+        p = Path(env)
+        if p.is_file():
+            return str(p.resolve())
+
     for name in ("nusmv", "NuSMV"):
         p = shutil.which(name)
         if p:
             return p
+
+    for candidate in _local_nusmv_candidates():
+        if candidate.is_file():
+            return str(candidate.resolve())
+
     return "NuSMV"
 
 
