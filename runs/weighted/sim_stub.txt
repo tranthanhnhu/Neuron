@@ -1,0 +1,15 @@
+# snn_mc.sim.stub — post-NuSMV summary (all specifications true).
+# emit_mode: lif
+# neurons: ['a', 'b', 'c1', 'c2', 'c3', 'c4']
+# inputs:  ['stim']
+# edges:   7
+#
+# NOTE: LIF membrane / leak dynamics are NOT replayed here; NuSMV lif_* is authoritative.
+# LIF wiring uses Boolean OR into x_exc / x_inh (sanitized names below).
+# simple_boolean uses per-edge weighted sum ((src) ? w : 0) + ... vs tau.
+#   a:  x_exc := c4.spike ; x_inh := b.spike
+#   b:  x_exc := a.spike ; x_inh := FALSE
+#   c1:  x_exc := stim ; x_inh := FALSE
+#   c2:  x_exc := c1.spike ; x_inh := FALSE
+#   c3:  x_exc := c2.spike ; x_inh := FALSE
+#   c4:  x_exc := c3.spike ; x_inh := FALSE

@@ -8,7 +8,8 @@ OUTPUT: NuSMV source text:
         - ``emit_model_smv``  -> standalone ``model.smv`` body (core + neuron MODULE tail).
 
 Supports two neuron encodings:
-    emit_mode == "lif"            — every neuron instantiates MODULE lif_<paramSet>(x_exc, x_inh, t).
+    emit_mode == "lif"            — every neuron instantiates MODULE lif_<paramSet>(net_exc, net_inh, t),
+                                    where net_exc/net_inh are weighted sums of the incoming edges.
     emit_mode == "simple_boolean" — every neuron instantiates MODULE bool_thr(inp_net, thr, t).
 """
 
@@ -22,21 +23,38 @@ from snn_mc.smv.lif_module import (
     generate_lif_module,
     validate_params,
 )
-from snn_mc.smv.prepare import SmvPrepared, or_of_sources
+from snn_mc.smv.prepare import SmvPrepared
 
 
-def _inline_net_sum(prepared: SmvPrepared, dst_n: str) -> str:
-    """Signed sum of edge weights gated by Boolean sources — used in ``simple_boolean`` mode."""
+def _src_bool(prepared: SmvPrepared, src: str) -> str:
+    """Boolean NuSMV expression that is TRUE when ``src`` is active this step."""
+    if src in prepared.inputs:
+        return src
+    if src in prepared.consts:
+        return "TRUE" if prepared.consts[src] else "FALSE"
+    return f"{src}.spike"
+
+
+def _weighted_sum(prepared: SmvPrepared, dst_n: str, *, sign: str = "all") -> str:
+    """
+    Signed sum of per-edge weights gated by Boolean sources feeding ``dst_n``.
+
+    ``sign`` selects which edges to include:
+      - ``"all"`` — every incoming edge (used by ``simple_boolean``),
+      - ``"exc"`` — only excitatory edges (weight >= 0),
+      - ``"inh"`` — only inhibitory edges (weight < 0).
+    Each active source contributes its own edge weight, so heterogeneous
+    ``weights=`` actually drive the membrane integration.
+    """
     terms: List[str] = []
     for e in prepared.edges:
         if e.dst != dst_n:
             continue
-        if e.src in prepared.inputs:
-            b = e.src
-        elif e.src in prepared.consts:
-            b = "TRUE" if prepared.consts[e.src] else "FALSE"
-        else:
-            b = f"{e.src}.spike"
+        if sign == "exc" and e.weight < 0:
+            continue
+        if sign == "inh" and e.weight >= 0:
+            continue
+        b = _src_bool(prepared, e.src)
         terms.append(f"(({b}) ? {e.weight} : 0)")
     return " + ".join(terms) if terms else "0"
 
@@ -100,13 +118,13 @@ def emit_model_core(ir: NetworkIR, prepared: SmvPrepared, *, emit_mode: str = "l
 
     if emit_mode == "lif":
         for n in neuron_list:
-            x_exc = or_of_sources(list(prepared.exc_srcs[n]))
-            x_inh = or_of_sources(list(prepared.inh_srcs[n]))
+            net_exc = _weighted_sum(prepared, n, sign="exc")
+            net_inh = _weighted_sum(prepared, n, sign="inh")
             pset = neuron_params.get(n, "default")
-            lines.append(f"  {n} : lif_{pset}({x_exc}, {x_inh}, t);")
+            lines.append(f"  {n} : lif_{pset}({net_exc}, {net_inh}, t);")
     else:
         for n in neuron_list:
-            net_ex = _inline_net_sum(prepared, n)
+            net_ex = _weighted_sum(prepared, n, sign="all")
             pset = neuron_params.get(n, "default")
             thr = prepared.param_specs[pset].tau
             lines.append(f"  {n} : bool_thr({net_ex}, {thr}, t);")

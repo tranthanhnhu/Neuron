@@ -62,15 +62,18 @@ def validate_params(spec: ParamSpec) -> None:
 def generate_lif_module(spec: ParamSpec) -> List[str]:
     """
     INPUT: ParamSpec describing one LIF parameter set.
-    OUTPUT: list of NuSMV lines defining ``MODULE lif_<spec.name>(x_exc, x_inh, t)``.
+    OUTPUT: list of NuSMV lines defining ``MODULE lif_<spec.name>(net_exc, net_inh, t)``.
     """
     mod_name = f"lif_{spec.name}"
     lines: List[str] = []
     lines.append(
-        f"-- LIF module '{mod_name}': tau={spec.tau}, w_exc={spec.w_exc}, w_inh={spec.w_inh}, "
+        f"-- LIF module '{mod_name}': tau={spec.tau}, default w_exc={spec.w_exc}, w_inh={spec.w_inh}, "
         f"S={spec.S}, R_init={spec.R_init}, Pmax={spec.Pmax}"
     )
-    lines.append(f"MODULE {mod_name}(x_exc, x_inh, t)")
+    lines.append(
+        "-- net_exc / net_inh are weighted sums of the incoming edges (per-edge weights from the DSL)."
+    )
+    lines.append(f"MODULE {mod_name}(net_exc, net_inh, t)")
     lines.append("VAR")
     lines.append(f"  P     : 0..{spec.Pmax};")
     lines.append(f"  r_num : 0..{spec.S};")
@@ -79,9 +82,7 @@ def generate_lif_module(spec: ParamSpec) -> List[str]:
     lines.append(f"  Pmax   := {spec.Pmax};")
     lines.append(f"  tau    := {spec.tau};")
     lines.append(f"  S_leak := {spec.S};")
-    lines.append(f"  w_exc  := {spec.w_exc};")
-    lines.append(f"  w_inh  := {spec.w_inh};")
-    lines.append("  input_sum := (x_exc ? w_exc : 0) + (x_inh ? w_inh : 0);")
+    lines.append("  input_sum := net_exc + net_inh;")
     lines.append("  leak_term := (r_num * P) / S_leak;")
     lines.append("  raw_next  := leak_term + input_sum;")
     lines.append("  spike     := (P >= tau);")

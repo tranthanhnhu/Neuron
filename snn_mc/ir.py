@@ -160,12 +160,17 @@ def clone_param_with_tau(
     """
     Ensure a ParamSpec named ``{base_name}_tau{tau}`` exists (copy of ``base_name`` with new tau).
     OUTPUT: param-set name to attach to neurons.
+
+    If ``tau`` already equals the base set's tau, no clone is made and ``base_name`` is
+    returned (avoids an identical, redundant duplicate param set).
     """
+    if base_name not in params:
+        raise ValueError(f"Unknown param-set '{base_name}'")
+    if tau == params[base_name].tau:
+        return base_name
     key = f"{base_name}_tau{tau}"
     if key in params:
         return key
-    if base_name not in params:
-        raise ValueError(f"Unknown param-set '{base_name}'")
     b = params[base_name]
     params[key] = ParamSpec(
         name=key,

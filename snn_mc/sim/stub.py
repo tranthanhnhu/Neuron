@@ -131,7 +131,7 @@ def run_simulation_stub(
         )
     lines.extend(
         [
-            "# LIF wiring uses Boolean OR into x_exc / x_inh (sanitized names below).",
+            "# LIF feeds a per-edge weighted sum into net_exc / net_inh (sanitized names below).",
             "# simple_boolean uses per-edge weighted sum ((src) ? w : 0) + ... vs tau.",
         ]
     )
@@ -139,7 +139,7 @@ def run_simulation_stub(
     for n in prep.neuron_list:
         xe = or_of_sources(list(prep.exc_srcs[n]))
         xi = or_of_sources(list(prep.inh_srcs[n]))
-        lines.append(f"#   {n}:  x_exc := {xe} ; x_inh := {xi}")
+        lines.append(f"#   {n}:  exc sources := {xe} ; inh sources := {xi}")
     text = "\n".join(lines) + "\n"
     if out is not None:
         out.write_text(text, encoding="utf-8")

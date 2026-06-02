@@ -33,4 +33,17 @@ block simple_series input=stim output=c2 N=2 prefix=c weights=3,5 threshold=4 pa
     assert "c2" in ir.network_outputs
     weights = [e.weight for e in ir.edges]
     assert 3 in weights and 5 in weights
-    assert ir.neuron_params.get("c1") == "default_tau4"
+    # threshold == default tau (4) => no redundant clone, neurons keep base set.
+    assert ir.neuron_params.get("c1") == "default"
+    assert "default_tau4" not in ir.params
+
+
+def test_threshold_override_clones_only_when_different() -> None:
+    dsl = """
+input stim
+block simple_series input=stim N=2 prefix=c threshold=6 params=default
+"""
+    ir = parse_text(dsl, source_path=REPO / "examples" / "series_negloop.dsl")
+    # threshold differs from default tau => a dedicated param set with tau=6 is created.
+    assert ir.neuron_params.get("c1") == "default_tau6"
+    assert ir.params["default_tau6"].tau == 6
