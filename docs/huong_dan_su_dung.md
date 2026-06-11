@@ -140,8 +140,8 @@ Khi dùng `--skip-verify`, step 6 sẽ ghi rõ verification đã bỏ qua.
 | `neurons` | Tên các neuron (`c1`…`c4`, `a`, `b`, …) |
 | `inputs` | Input boolean (`stim`, …) |
 | `edges` | Cạnh: `src`, `dst`, `weight` (dương = kích thích, âm = ức chế) |
-| `params` | Bộ tham số LIF (`tau`, `w_exc`, `w_inh`, …) |
-| `neuron_params` | Neuron nào dùng bộ param nào (thường `default`) |
+| `params` | Bộ tham số LIF (`tau`, `w_exc`, `w_inh`, …) gồm cả 3 loại built-in `quick`/`intermediate`/`slow` |
+| `neuron_params` | Neuron nào dùng loại nào (`default`, `quick`, `intermediate`, `slow`, …) |
 | `archetypes` | Các `block` đã khai báo: `kind`, `nodes`, `inputs` |
 | `schedules` | Lịch `TRUE/FALSE` cho từng input theo bước thời gian |
 | `compositions` | Chuỗi `sequential` hoặc `parallel` (nếu có) |
@@ -186,6 +186,28 @@ Cách tham số hóa `N`: xem [parameterize_N.md](parameterize_N.md).
 
 ---
 
+## 10b. Ba loại neuron và output tự động
+
+**Ba loại neuron built-in** (luôn có sẵn, không cần khai báo `neuron_params`). Một "loại" = cặp
+**(ngưỡng `tau`, leak factor `R/S`)**; leak nay **cố định** (`r_num` luôn = `R`). Chọn bằng
+`params=<loại>` trên block:
+
+| Loại | `tau` | leak `R/S` | `w_exc` | Ý nghĩa |
+|------|-------|-----------|---------|---------|
+| `quick` | 2 | 0.75 | 3 | ngưỡng thấp + leak cao → spike sớm |
+| `intermediate` | 4 | 0.50 | 3 | cân bằng (giống `default`) |
+| `slow` | 6 | 0.25 | 5 | ngưỡng cao + leak thấp → spike muộn |
+
+> `slow` dùng `w_exc` lớn hơn để neuron ngưỡng-cao/leak-thấp vẫn đạt được ngưỡng
+> (`P_ss = w_exc/(1 - R/S)` phải `>= tau`).
+
+**Output tự động**: mỗi archetype tự quyết định neuron nào là output — **không cần** khai báo
+`output=` hay `network_output`. Ví dụ: `simple_series` → neuron cuối; `negative_loop` → tất cả
+neuron trong vòng lặp; `parallel_composition` → tất cả nhánh. Xem bảng đầy đủ trong
+[dsl_spec.md](dsl_spec.md).
+
+---
+
 ## 11. DSL demo `series_negloop.dsl` (tham khảo)
 
 ```text
@@ -193,9 +215,11 @@ include neuron_base.dsl
 input stim
 schedule stim values TRUE TRUE FALSE TRUE TRUE FALSE
 
-block simple_series  input=stim N=4 prefix=c params=default
-block negative_loop  input=c4   A=a B=b      params=default
+block simple_series  input=stim N=4 prefix=c params=intermediate
+block negative_loop  input=c4   A=a B=b      params=quick
 ```
+
+Output tự động: `c4` (neuron cuối của chuỗi) và `a`, `b` (toàn bộ vòng lặp).
 
 Topology (N=4):
 

@@ -6,13 +6,15 @@ DSL forms:
     block positive_loop input=stim N=3 prefix=p        params=default
 
 Wiring: stim -> n1 -> ... -> nN -> n1 (last edge closes the ring excitatorily).
+
+Output (automatic): every neuron in the ring (the user does not declare it).
 """
 
 from __future__ import annotations
 
 from typing import Dict, FrozenSet, List, Optional
 
-from snn_mc.archetypes.block_helpers import exc_weights_for_chain, resolve_block_output
+from snn_mc.archetypes.block_helpers import exc_weights_for_chain
 from snn_mc.ir import ArchetypeInstance, Edge
 from snn_mc.archetypes.base import ArchetypeBase, BlockApplyContext, expand_chain
 from snn_mc.archetypes.graph_index import GraphIndex
@@ -29,9 +31,6 @@ class PositiveLoopArchetype(ArchetypeBase):
         ns_list = expand_chain(kv, ctx, what="block positive_loop")
         threshold = int(kv["threshold"]) if "threshold" in kv else None
         ctx.apply_threshold(ns_list, pset, threshold)
-        out_port = resolve_block_output(
-            kv, ns_list, line_no=ctx.line_no, what="block positive_loop"
-        )
         exc_edges = [(stim, ns_list[0])] + list(zip(ns_list, ns_list[1:])) + [
             (ns_list[-1], ns_list[0])
         ]
@@ -45,7 +44,7 @@ class PositiveLoopArchetype(ArchetypeBase):
                 kind=cls.kind,
                 nodes=tuple(ns_list),
                 inputs={"stim": stim},
-                meta={"output": out_port},
+                meta={"outputs": list(ns_list)},
                 explicit=True,
             )
         )

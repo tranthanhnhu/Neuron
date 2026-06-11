@@ -164,6 +164,22 @@ class ArchetypeBase(ABC):
         return []
 
     @classmethod
+    def outputs(cls, inst: ArchetypeInstance) -> tuple[str, ...]:
+        """
+        Observable output neurons of this archetype instance.
+
+        Outputs are determined by the archetype itself (its Python implementation stores
+        them in ``inst.meta["outputs"]`` at parse/detect time). The user never has to
+        declare them in the DSL. Each archetype decides which neurons are observable:
+        e.g. ``simple_series`` exposes its last neuron, ``negative_loop`` exposes every
+        neuron in the loop.
+
+        INPUT: a matched ArchetypeInstance.
+        OUTPUT: tuple of neuron names (empty when none were recorded).
+        """
+        return tuple(inst.meta.get("outputs", ()))
+
+    @classmethod
     def detect(cls, idx: GraphIndex) -> List[ArchetypeInstance]:
         """INPUT: precomputed graph index. OUTPUT: instances inferred without DSL macros."""
         return []

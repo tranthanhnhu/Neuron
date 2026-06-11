@@ -45,11 +45,11 @@ def _validate_outputs(ir: NetworkIR) -> None:
                 f"compose: network output '{out}' is unknown; declare it as a neuron first."
             )
     for inst in ir.archetypes:
-        out = inst.meta.get("output")
-        if out and out not in valid:
-            raise ValueError(
-                f"compose: archetype '{inst.kind}' output '{out}' is not a declared neuron."
-            )
+        for out in inst.meta.get("outputs", []):
+            if out not in valid:
+                raise ValueError(
+                    f"compose: archetype '{inst.kind}' output '{out}' is not a declared neuron."
+                )
 
 
 def _validate_block_inputs(ir: NetworkIR) -> None:

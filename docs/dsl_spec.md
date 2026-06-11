@@ -18,7 +18,7 @@ adopted later if the language grows (fork/join, richer expressions).
 | `horizon <int>` | Simulation length; NuSMV clock `t` ranges `0..horizon` |
 | `input <name>` | External Boolean stimulus |
 | `schedule <input> values TRUE FALSE ...` | Fixed prefix of input trace; tail is nondeterministic |
-| `network_output <neuron>` | Declare a network-level output port (observable neuron) |
+| `network_output <neuron>` | OPTIONAL manual override; blocks expose their outputs automatically (see below) |
 | `neuron_params <name> tau=... w_exc=... w_inh=... S=... R=... Pmax=...` | LIF parameter bundle |
 | `block <kind> key=value ...` | Archetype macro (see below) |
 | `edge <src> -> <dst> weight <int>` | Manual synapse |
@@ -27,32 +27,62 @@ adopted later if the language grows (fork/join, richer expressions).
 
 Block keys are **case-insensitive** (`Input=stim` = `input=stim`).
 
+### Neuron types (Quick / Intermediate / Slow)
+
+A neuron's behaviour is the pair **(threshold `tau`, leak factor `R/S`)**. The leak factor is
+**fixed** per type — `r_num` stays at `R_init`, so the retained fraction `R/S` never changes.
+Three types are **always built-in** (no `neuron_params` declaration needed); select them with
+`params=<type>` on any block:
+
+| Type | `tau` | leak `R/S` | `w_exc` | Meaning |
+|------|-------|-----------|---------|---------|
+| `quick` | 2 | 3/4 = 0.75 | 3 | low threshold + high leak → fires fast |
+| `intermediate` | 4 | 2/4 = 0.50 | 3 | balanced (identical to `default`) |
+| `slow` | 6 | 1/4 = 0.25 | 5 | high threshold + low leak → fires late |
+
+`slow` uses a larger `w_exc` so a high-threshold / low-leak neuron can still reach `tau`
+(steady-state `P_ss = w_exc / (1 - R/S)` must be `>= tau`). You can still define custom sets
+with `neuron_params <name> ...`.
+
+### Automatic outputs (no `output=` / `network_output` needed)
+
+Each archetype **decides its own observable outputs** in its Python implementation; the user
+never declares them. Manual `network_output <neuron>` remains available only as an override.
+
+| Archetype | Automatic output(s) |
+|-----------|---------------------|
+| `simple_series` | last neuron of the chain |
+| `series_multiple_outputs` | every neuron |
+| `parallel_composition` | every branch (all but the source) |
+| `negative_loop` | every neuron in the loop |
+| `positive_loop` | every neuron in the ring |
+| `contralateral_inhibition` | every competitor neuron |
+| `inhibition_of_behavior` | the inhibitor `I` and the target `T` |
+
 ### `block simple_series` keys
 
 | Key | Required | Description |
 |-----|----------|-------------|
 | `input` | yes | DSL `input` name or upstream neuron |
-| `output` | no | Output neuron (default: last in chain) |
 | `N`, `prefix` **or** `neurons` | yes | Chain length / names |
 | `weights` | no | Comma list or `[a,b,c]`; one weight per excitatory edge (`input→n1`, `n1→n2`, …) |
 | `threshold` | no | Override firing threshold τ for neurons in this block |
-| `params` | no | `neuron_params` set name (default `default`) |
+| `params` | no | Neuron type / `neuron_params` set name (default `default`) |
 
 ### `block negative_loop` keys
 
 | Key | Required | Description |
 |-----|----------|-------------|
 | `input` | yes | Driver for first neuron |
-| `output` | no | Observable output neuron (default: last in loop) |
 | `A`, `B` **or** `N`/`prefix` **or** `neurons` | yes | Loop neurons |
 | `exc_weights` / `weights` | no | Excitatory edge weights (stim→head, chain, …) |
 | `inh_weight` | no | Magnitude of inhibitory back-edge (stored negative) |
 | `threshold`, `params` | no | As above |
 
-Equivalent intent to the supervisor’s illustrative form:
+Output is automatic (last neuron for `simple_series`, all loop neurons for `negative_loop`):
 
 ```text
-block simple_series input=stim output=c4 N=4 prefix=c weights=3,2,5,4 threshold=4 params=default
+block simple_series input=stim N=4 prefix=c weights=3,2,5,4 params=intermediate
 ```
 
 ## Semantics

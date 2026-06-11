@@ -195,12 +195,21 @@ def prepare_ir(ir: NetworkIR) -> SmvPrepared:
         return cur
 
     var_inputs = tuple(sorted(i for i in inputs if i not in tie_s))
+
+    def rn_meta(mv: object) -> object:
+        # Meta values may be a single name (str) or a list of names (e.g. "outputs").
+        if isinstance(mv, list):
+            return [rn(x) if isinstance(x, str) and x in mapping else x for x in mv]
+        if isinstance(mv, str) and mv in mapping:
+            return rn(mv)
+        return mv
+
     arch_list_s = [
         ArchetypeInstance(
             kind=a.kind,
             nodes=tuple(rn(n) for n in a.nodes),
             inputs={ik: rn(iv) for ik, iv in a.inputs.items()},
-            meta={mk: (rn(mv) if mv in mapping else mv) for mk, mv in a.meta.items()},
+            meta={mk: rn_meta(mv) for mk, mv in a.meta.items()},
             explicit=a.explicit,
         )
         for a in archetypes

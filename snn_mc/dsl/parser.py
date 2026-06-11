@@ -15,8 +15,8 @@ Supported lines (one per line, ``#`` starts a comment):
     spec <CTLSPEC|LTLSPEC|INVARSPEC> <formula...>    # raw temporal-logic spec
     compose <sequential|parallel> n1 n2 [n3 ...]     # explicit composition
     horizon <int>                                      # simulation steps (NuSMV clock 0..horizon)
-    network_output <neuron>                            # declare network output port
-    block <kind> key=value ...                       # input output weights threshold N prefix ...
+    network_output <neuron>                            # OPTIONAL manual override; blocks set outputs automatically
+    block <kind> key=value ...                       # input weights threshold N prefix ... (output is automatic)
     chain from <input> prefix <p> count <n> [weight <int>] [params <set>]
 
 The parser also supports an optional CLI-time override for ``N`` inside ``block`` lines:
@@ -149,6 +149,16 @@ def _parse_body(text: str, *, override_n: Optional[int]) -> NetworkIR:
         R_init=2,
         Pmax=10,
     )
+    # Built-in neuron "types" (supervisor's Quick / Intermediate / Slow taxonomy).
+    # A type is the pair (threshold tau, leak factor R/S); leak is FIXED per type
+    # (see lif_module: next(r_num) := r_num). 'slow' needs a larger w_exc so that a
+    # high-threshold/low-leak neuron can still reach tau (P_ss = w_exc/(1-R/S) >= tau).
+    for _spec in (
+        ParamSpec(name="quick", tau=2, w_exc=3, w_inh=-3, S=4, R_init=3, Pmax=10),
+        ParamSpec(name="intermediate", tau=4, w_exc=3, w_inh=-3, S=4, R_init=2, Pmax=10),
+        ParamSpec(name="slow", tau=6, w_exc=5, w_inh=-5, S=4, R_init=1, Pmax=10),
+    ):
+        params[_spec.name] = _spec
 
     def parse_csv_list(val: str, line_no: int) -> List[str]:
         items = [x.strip() for x in val.split(",") if x.strip()]
@@ -367,8 +377,11 @@ def _parse_body(text: str, *, override_n: Optional[int]) -> NetworkIR:
                 return int(kv[name]) if name in kv else default
 
             pset = get("params", "default")
-            w_exc = get_int("weight", params["default"].w_exc)
-            w_inh = -abs(get_int("inh_weight", abs(params["default"].w_inh)))
+            # Default edge weights follow the SELECTED param set, not always 'default',
+            # so that e.g. params=slow (w_exc=5) yields edges strong enough to reach tau.
+            base_pset = params.get(pset, params["default"])
+            w_exc = get_int("weight", base_pset.w_exc)
+            w_inh = -abs(get_int("inh_weight", abs(base_pset.w_inh)))
 
             def apply_threshold(neuron_names: List[str], param_set: str, threshold: Optional[int]) -> None:
                 for n in neuron_names:
@@ -391,8 +404,10 @@ def _parse_body(text: str, *, override_n: Optional[int]) -> NetworkIR:
                 apply_threshold=apply_threshold,
             )
             block_cls.apply_block(kv, ctx)
-            if archetypes and archetypes[-1].explicit and "output" in archetypes[-1].meta:
-                network_outputs.append(archetypes[-1].meta["output"])
+            if archetypes and archetypes[-1].explicit:
+                # Outputs are decided by the archetype itself (meta["outputs"]); the user
+                # does not declare output= / network_output for blocks.
+                network_outputs.extend(archetypes[-1].meta.get("outputs", []))
             if "roles" in kv and archetypes:
                 last = archetypes[-1]
                 if last.explicit:
@@ -425,8 +440,8 @@ def _parse_body(text: str, *, override_n: Optional[int]) -> NetworkIR:
 
     if not network_outputs:
         for a in archetypes:
-            if a.explicit and a.meta.get("output"):
-                network_outputs.append(a.meta["output"])
+            if a.explicit:
+                network_outputs.extend(a.meta.get("outputs", []))
 
     return NetworkIR(
         neurons=neurons,

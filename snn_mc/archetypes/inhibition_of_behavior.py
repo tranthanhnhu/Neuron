@@ -38,7 +38,7 @@ class InhibitionOfBehaviorArchetype(ArchetypeBase):
                 kind=cls.kind,
                 nodes=(i, t_),
                 inputs={"stimI": stim_i, "stimT": stim_t},
-                meta={},
+                meta={"outputs": [i, t_]},
                 explicit=True,
             )
         )
@@ -58,11 +58,11 @@ class InhibitionOfBehaviorArchetype(ArchetypeBase):
         i, t = ns[0], ns[1]
         stim_t = stim_token(inst.inputs.get("stimT"), neurons)
         lines = [
-            f"LTLSPEC (G ({i}.spike & ({i}.r_num >= 2))) -> (G !{t}.spike)",
+            f"LTLSPEC (G {i}.spike) -> (G !{t}.spike)",
         ]
         if stim_t:
             lines.append(
-                f"LTLSPEC (G ({stim_t} & !{i}.spike & ({t}.r_num >= 2))) -> (F {t}.spike)"
+                f"LTLSPEC (G ({stim_t} & !{i}.spike)) -> (F {t}.spike)"
             )
         return lines
 
@@ -85,7 +85,7 @@ class InhibitionOfBehaviorArchetype(ArchetypeBase):
                                 "stimI": sorted(idx.exc_in_from_input[i])[0],
                                 "stimT": sorted(idx.exc_in_from_input[t])[0],
                             },
-                            meta={},
+                            meta={"outputs": [i, t]},
                             explicit=False,
                         )
                     )

@@ -40,10 +40,10 @@ def render_step4(ir: NetworkIR, prepared: SmvPrepared) -> str:
         lines.append(f"        nodes = {list(inst.nodes)}")
         if inst.inputs:
             lines.append(f"        inputs = {dict(inst.inputs)}")
-        if inst.meta.get("output"):
-            lines.append(f"        output = {inst.meta['output']!r}")
+        if inst.meta.get("outputs"):
+            lines.append(f"        outputs = {list(inst.meta['outputs'])}")
         if inst.meta:
-            extra = {k: v for k, v in inst.meta.items() if k != "output"}
+            extra = {k: v for k, v in inst.meta.items() if k != "outputs"}
             if extra:
                 lines.append(f"        meta = {extra}")
 

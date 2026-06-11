@@ -5,4 +5,4 @@ include neuron_base.dsl
 input stim
 schedule stim values TRUE TRUE FALSE TRUE
 
-block simple_series input=stim N=5 prefix=n params=default
+block simple_series input=stim N=5 prefix=n params=quick

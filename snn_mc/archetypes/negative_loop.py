@@ -2,7 +2,9 @@
 negative_loop — N neurons chained excitatorily with an inhibitory back-edge that closes the loop.
 
 DSL forms:
-    block negative_loop input=c4 output=b A=a B=b exc_weights=3,3 inh_weight=3 threshold=4
+    block negative_loop input=c4 A=a B=b exc_weights=3,3 inh_weight=3 params=quick
+
+Output (automatic): every neuron in the loop (the user does not declare it).
 """
 
 from __future__ import annotations
@@ -12,7 +14,6 @@ from typing import Dict, FrozenSet, List, Optional, Set, Tuple
 from snn_mc.archetypes.block_helpers import (
     exc_weights_for_chain,
     inh_weight_from_kv,
-    resolve_block_output,
 )
 from snn_mc.ir import ArchetypeInstance, Edge
 from snn_mc.archetypes.base import (
@@ -75,9 +76,6 @@ class NegativeLoopArchetype(ArchetypeBase):
 
         threshold: Optional[int] = int(kv["threshold"]) if "threshold" in kv else None
         ctx.apply_threshold(ns_list, pset, threshold)
-        out_port = resolve_block_output(
-            kv, ns_list, line_no=ctx.line_no, what="block negative_loop"
-        )
 
         exc_edges: List[tuple[str, str]] = [(stim, ns_list[0])]
         exc_edges.extend(zip(ns_list, ns_list[1:]))
@@ -98,7 +96,7 @@ class NegativeLoopArchetype(ArchetypeBase):
                 kind=cls.kind,
                 nodes=tuple(ns_list),
                 inputs={"stim": stim},
-                meta={"output": out_port},
+                meta={"outputs": list(ns_list)},
                 explicit=True,
             )
         )
@@ -153,7 +151,7 @@ class NegativeLoopArchetype(ArchetypeBase):
                     kind=cls.kind,
                     nodes=path,
                     inputs={},
-                    meta={"output": path[-1]},
+                    meta={"outputs": list(path)},
                     explicit=False,
                 )
             )

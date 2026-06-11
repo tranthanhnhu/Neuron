@@ -5,10 +5,12 @@ Public API:
     validate_params(spec)       — heuristic parameter sanity checks.
     generate_lif_module(spec)   — list[str] of NuSMV lines defining MODULE lif_<spec.name>.
 
-The emitted module follows the same scheme as the legacy ``lif_neuron_6.smv`` reference:
+The emitted module follows the same scheme as the legacy ``lif_neuron_6.smv`` reference,
+except the leak factor is FIXED per neuron type (Quick/Intermediate/Slow): ``r_num`` is
+held constant at ``R_init`` (so the leak fraction ``R/S`` never changes during a run):
     VAR    P : 0..Pmax;     r_num : 0..S;
     DEFINE input_sum, leak_term, raw_next, spike
-    ASSIGN init(P)=0; init(r_num)=R_init;
+    ASSIGN init(P)=0; init(r_num)=R_init; next(r_num)=r_num;  -- fixed leak
            next(P) := case spike : 0; clamp; raw_next; esac;
 """
 
@@ -90,11 +92,8 @@ def generate_lif_module(spec: ParamSpec) -> List[str]:
     lines.append("ASSIGN")
     lines.append("  init(P) := 0;")
     lines.append(f"  init(r_num) := {spec.R_init};")
-    lines.append("  next(r_num) :=")
-    lines.append("    case")
-    lines.append("      t < 4 : r_num;")
-    lines.append(f"      TRUE  : 0..{spec.S};")
-    lines.append("    esac;")
+    lines.append("  -- Leak factor is FIXED per neuron type: r_num stays at R_init (R/S constant).")
+    lines.append("  next(r_num) := r_num;")
     lines.append("  next(P) :=")
     lines.append("    case")
     lines.append("      spike           : 0;")

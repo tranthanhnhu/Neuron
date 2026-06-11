@@ -2,18 +2,20 @@
 simple_series — linear chain of N neurons fed by one input.
 
 DSL forms (interchangeable):
-    block simple_series input=stim output=c4 neurons=n1,n2,n3        params=default
-    block simple_series input=stim N=3   prefix=n  weights=3,2,5    threshold=4
+    block simple_series input=stim neurons=n1,n2,n3        params=quick
+    block simple_series input=stim N=3   prefix=n  weights=3,2,5    params=default
+
+Output (automatic): the last neuron of the chain. The user does not declare it.
 
 Auto-properties:
-    LTLSPEC (G (stim & (first.r_num >= 2))) -> (F last.spike)
+    LTLSPEC (G stim) -> (F last.spike)
 """
 
 from __future__ import annotations
 
 from typing import Dict, FrozenSet, List, Optional
 
-from snn_mc.archetypes.block_helpers import exc_weights_for_chain, resolve_block_output
+from snn_mc.archetypes.block_helpers import exc_weights_for_chain
 from snn_mc.ir import ArchetypeInstance, Composition, Edge
 from snn_mc.archetypes.base import (
     ArchetypeBase,
@@ -36,7 +38,6 @@ class SimpleSeriesArchetype(ArchetypeBase):
         if "threshold" in kv:
             threshold = int(kv["threshold"])
         ctx.apply_threshold(ns, pset, threshold)
-        out_port = resolve_block_output(kv, ns, line_no=ctx.line_no, what="block simple_series")
 
         edge_pairs: List[tuple[str, str]] = [(stim, ns[0])]
         edge_pairs.extend(zip(ns, ns[1:]))
@@ -55,7 +56,7 @@ class SimpleSeriesArchetype(ArchetypeBase):
                 kind=cls.kind,
                 nodes=tuple(ns),
                 inputs={"stim": stim},
-                meta={"output": out_port},
+                meta={"outputs": [ns[-1]]},
                 explicit=True,
             )
         )
@@ -71,8 +72,8 @@ class SimpleSeriesArchetype(ArchetypeBase):
         ns = inst.nodes
         stim = stim_token(inst.inputs.get("stim"), neurons)
         if stim and len(ns) >= 2:
-            first, last = ns[0], ns[-1]
-            return [f"LTLSPEC (G ({stim} & ({first}.r_num >= 2))) -> (F {last}.spike)"]
+            last = ns[-1]
+            return [f"LTLSPEC (G {stim}) -> (F {last}.spike)"]
         return []
 
     @classmethod
@@ -103,7 +104,7 @@ class SimpleSeriesArchetype(ArchetypeBase):
                         kind=cls.kind,
                         nodes=tuple(chain),
                         inputs={},
-                        meta={"output": chain[-1]},
+                        meta={"outputs": [chain[-1]]},
                         explicit=False,
                     )
                 )

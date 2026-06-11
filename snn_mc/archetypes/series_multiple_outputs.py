@@ -42,7 +42,7 @@ class SeriesMultipleOutputsArchetype(ArchetypeBase):
                 kind=cls.kind,
                 nodes=tuple(ns),
                 inputs={"stim": stim},
-                meta={"output": ",".join(ns)},
+                meta={"outputs": list(ns)},
                 explicit=True,
             )
         )

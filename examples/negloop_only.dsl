@@ -5,4 +5,4 @@ include neuron_base.dsl
 input stim
 schedule stim values TRUE FALSE TRUE TRUE FALSE
 
-block negative_loop input=stim A=a B=b params=default
+block negative_loop input=stim A=a B=b params=slow

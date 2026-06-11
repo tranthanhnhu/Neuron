@@ -67,7 +67,7 @@ class ContralateralInhibitionArchetype(ArchetypeBase):
                 kind=cls.kind,
                 nodes=tuple(ns_list),
                 inputs={"stim": stim},
-                meta={},
+                meta={"outputs": list(ns_list)},
                 explicit=True,
             )
         )
@@ -116,7 +116,7 @@ class ContralateralInhibitionArchetype(ArchetypeBase):
                         kind=cls.kind,
                         nodes=tuple(sorted(q)),
                         inputs={"stim": stim},
-                        meta={},
+                        meta={"outputs": sorted(q)},
                         explicit=False,
                     )
                 )

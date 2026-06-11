@@ -11,7 +11,6 @@ from snn_mc.ir import ParamSpec, clone_param_with_tau
 
 _BLOCK_KEY_ALIASES: Dict[str, str] = {
     "input": "input",
-    "output": "output",
     "weights": "weights",
     "weight": "weight",
     "exc_weights": "exc_weights",
@@ -62,25 +61,6 @@ def suggest_block_kind(kind: str, valid_kinds: List[str]) -> str:
     if len(close) > 1:
         msg += f" (also similar: {', '.join(close[1:])})"
     return msg
-
-
-def resolve_block_output(
-    kv: Dict[str, str],
-    nodes: List[str],
-    *,
-    line_no: int,
-    what: str,
-) -> str:
-    if "output" in kv:
-        out = kv["output"].strip()
-        if out not in nodes:
-            raise ValueError(
-                f"line {line_no}: {what}: output '{out}' must be one of {nodes}"
-            )
-        return out
-    if not nodes:
-        raise ValueError(f"line {line_no}: {what}: cannot infer output from empty node list")
-    return nodes[-1]
 
 
 def exc_weights_for_chain(

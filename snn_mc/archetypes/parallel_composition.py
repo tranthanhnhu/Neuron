@@ -78,7 +78,7 @@ class ParallelCompositionArchetype(ArchetypeBase):
                 kind=cls.kind,
                 nodes=tuple([src] + outs),
                 inputs={"stim": stim},
-                meta={"src": src},
+                meta={"src": src, "outputs": list(outs)},
                 explicit=True,
             )
         )
@@ -99,7 +99,7 @@ class ParallelCompositionArchetype(ArchetypeBase):
         lines = [f"CTLSPEC EF {n}.spike" for n in ns]
         if stim and src and outs:
             or_out = " | ".join([f"{o}.spike" for o in outs])
-            lines.append(f"LTLSPEC (G ({stim} & ({src}.r_num >= 2))) -> (F ({or_out}))")
+            lines.append(f"LTLSPEC (G {stim}) -> (F ({or_out}))")
         return lines
 
     @classmethod
@@ -114,7 +114,7 @@ class ParallelCompositionArchetype(ArchetypeBase):
                         kind=cls.kind,
                         nodes=tuple([src] + outs),
                         inputs={},
-                        meta={"src": src},
+                        meta={"src": src, "outputs": list(outs)},
                         explicit=False,
                     )
                 )
