@@ -71,7 +71,9 @@ def run_nusmv(
     exe = nusmv_exe or find_nusmv()
     if not shutil.which(exe) and not Path(exe).is_file():
         raise FileNotFoundError(f"NuSMV not found: {exe}")
-    proc = subprocess.run([exe, str(combined_smv)], capture_output=True, text=True)
+    # -dynamic enables BDD dynamic variable reordering, which keeps the sigma-window
+    # encoding (several in_hist registers per neuron) tractable for the model checker.
+    proc = subprocess.run([exe, "-dynamic", str(combined_smv)], capture_output=True, text=True)
     text = (proc.stdout or "") + (proc.stderr or "")
     log_path.write_text(text, encoding="utf-8")
     return proc.returncode, text

@@ -6,8 +6,8 @@ MODULE main
 VAR
   t : 0..20;
   stim : boolean;
-  a : lif_slow(((stim) ? 5 : 0), ((b.spike) ? -5 : 0), t);
-  b : lif_slow(((a.spike) ? 5 : 0), 0, t);
+  a : lif_quick(((stim) ? 3 : 0), ((b.spike) ? -3 : 0), t);
+  b : lif_quick(((a.spike) ? 3 : 0), 0, t);
 
 ASSIGN
   init(t) := 0;
@@ -30,7 +30,7 @@ CTLSPEC AG ((a.P >= 0) & (a.P <= a.Pmax))
 -- [a] [Semantic]
 CTLSPEC AG (a.spike <-> (a.P >= a.tau))
 -- [a] [Structural]
-CTLSPEC AG (a.r_num = 1)
+CTLSPEC AG (a.r_num = 3)
 -- [b] [Safety-Reset]
 CTLSPEC AG (b.spike -> AX (b.P = 0))
 -- [b] [Safety-Bound]
@@ -38,7 +38,7 @@ CTLSPEC AG ((b.P >= 0) & (b.P <= b.Pmax))
 -- [b] [Semantic]
 CTLSPEC AG (b.spike <-> (b.P >= b.tau))
 -- [b] [Structural]
-CTLSPEC AG (b.r_num = 1)
+CTLSPEC AG (b.r_num = 3)
 
 -- Archetype properties (auto-generated)
 -- From negative_loop on nodes ['a', 'b']
@@ -53,6 +53,8 @@ CTLSPEC AG (b.spike -> EF a.spike)
 -- [Oscillation]
 CTLSPEC AG ((a.spike -> AF !a.spike) & (!a.spike -> AF a.spike))
 CTLSPEC AG ((b.spike -> AF !b.spike) & (!b.spike -> AF b.spike))
+-- [Quiescence]
+LTLSPEC (G !stim) -> (G (!a.spike & !b.spike))
 -- From simple_series on nodes ['a', 'b']
 -- [Reachability]
 CTLSPEC EF a.spike
@@ -61,20 +63,20 @@ CTLSPEC EF b.spike
 CTLSPEC AG (a.spike -> EF b.spike)
 -- [End-to-end]
 CTLSPEC AG (a.spike -> EF b.spike)
--- LIF module 'lif_slow': tau=6, sigma=3, default w_exc=5, w_inh=-5, S=4, R_init=1, Pmax=10
+-- LIF module 'lif_quick': tau=2, sigma=3, default w_exc=3, w_inh=-3, S=4, R_init=3, Pmax=10
 -- net_exc / net_inh are weighted sums of the incoming edges (per-edge weights from the DSL).
 -- σ-window update: p = sum_{e=0}^{3} (R/S)^e * input_sum(t-e); spike := (P >= tau).
-MODULE lif_slow(net_exc, net_inh, t)
+MODULE lif_quick(net_exc, net_inh, t)
 VAR
   P     : 0..10;
   r_num : 0..4;
-  in_hist_1 : -10..10;
-  in_hist_2 : -10..10;
-  in_hist_3 : -10..10;
+  in_hist_1 : -3..3;
+  in_hist_2 : -3..3;
+  in_hist_3 : -3..3;
 
 DEFINE
   Pmax   := 10;
-  tau    := 6;
+  tau    := 2;
   S_leak := 4;
   input_sum := net_exc + net_inh;
   window_sum := input_sum + ((r_num) * in_hist_1) / (S_leak) + ((r_num * r_num) * in_hist_2) / (S_leak * S_leak) + ((r_num * r_num * r_num) * in_hist_3) / (S_leak * S_leak * S_leak);
@@ -82,7 +84,7 @@ DEFINE
 
 ASSIGN
   init(P) := 0;
-  init(r_num) := 1;
+  init(r_num) := 3;
   init(in_hist_1) := 0;
   init(in_hist_2) := 0;
   init(in_hist_3) := 0;

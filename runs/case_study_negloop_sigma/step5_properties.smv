@@ -9,7 +9,7 @@ CTLSPEC AG ((a.P >= 0) & (a.P <= a.Pmax))
 -- [a] [Semantic]
 CTLSPEC AG (a.spike <-> (a.P >= a.tau))
 -- [a] [Structural]
-CTLSPEC AG (a.r_num = 1)
+CTLSPEC AG (a.r_num = 3)
 -- [b] [Safety-Reset]
 CTLSPEC AG (b.spike -> AX (b.P = 0))
 -- [b] [Safety-Bound]
@@ -17,7 +17,7 @@ CTLSPEC AG ((b.P >= 0) & (b.P <= b.Pmax))
 -- [b] [Semantic]
 CTLSPEC AG (b.spike <-> (b.P >= b.tau))
 -- [b] [Structural]
-CTLSPEC AG (b.r_num = 1)
+CTLSPEC AG (b.r_num = 3)
 
 -- Archetype properties (auto-generated)
 -- From negative_loop on nodes ['a', 'b']
@@ -32,6 +32,8 @@ CTLSPEC AG (b.spike -> EF a.spike)
 -- [Oscillation]
 CTLSPEC AG ((a.spike -> AF !a.spike) & (!a.spike -> AF a.spike))
 CTLSPEC AG ((b.spike -> AF !b.spike) & (!b.spike -> AF b.spike))
+-- [Quiescence]
+LTLSPEC (G !stim) -> (G (!a.spike & !b.spike))
 -- From simple_series on nodes ['a', 'b']
 -- [Reachability]
 CTLSPEC EF a.spike

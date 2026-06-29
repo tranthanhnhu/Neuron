@@ -20,6 +20,7 @@ from snn_mc.archetypes.base import (
     ArchetypeBase,
     BlockApplyContext,
     expand_chain,
+    stim_token,
     validate_archetype_list_size,
 )
 from snn_mc.archetypes.graph_index import GraphIndex
@@ -29,6 +30,7 @@ from snn_mc.archetypes.spec_templates import (
     mutual_exclusion,
     oscillation_section,
     section,
+    silence_without_stim,
 )
 
 
@@ -126,6 +128,10 @@ class NegativeLoopArchetype(ArchetypeBase):
             lines.append(f"CTLSPEC AG ({n_first}.spike -> EF {n_last}.spike)")
             lines.append(f"CTLSPEC AG ({n_last}.spike -> EF {n_first}.spike)")
             lines.extend(oscillation_section(ns))
+            stim = stim_token(inst.inputs.get("stim"), neurons)
+            if stim:
+                lines.append(section("Quiescence"))
+                lines.append(silence_without_stim(stim, ns))
         else:
             lines.extend(ctl_propagate_chain(ns))
         return lines

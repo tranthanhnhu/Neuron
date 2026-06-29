@@ -153,6 +153,24 @@ def emit_model_core(ir: NetworkIR, prepared: SmvPrepared, *, emit_mode: str = "l
     return "\n".join(lines) + "\n"
 
 
+def _pset_max_input(prepared: SmvPrepared, pset_name: str) -> int:
+    """
+    Upper bound on the reachable ``|input_sum|`` for any neuron driven by ``pset_name``.
+
+    ``input_sum = net_exc + net_inh`` lies in ``[Sum(inh), Sum(exc)]``, so its magnitude is at
+    most ``max(Sum(exc), |Sum(inh)|)`` for each neuron. The maximum over all neurons of this
+    parameter set is a safe bound for every history register of ``MODULE lif_<pset>``.
+    """
+    h = 0
+    for n in prepared.neuron_list:
+        if prepared.neuron_params.get(n, "default") != pset_name:
+            continue
+        exc = sum(e.weight for e in prepared.edges if e.dst == n and e.weight > 0)
+        inh = sum(-e.weight for e in prepared.edges if e.dst == n and e.weight < 0)
+        h = max(h, exc, inh)
+    return h
+
+
 def emit_lif_modules(prepared: SmvPrepared) -> str:
     """
     INPUT: SmvPrepared (uses ``neuron_params`` to discover which parameter sets are referenced).
@@ -163,7 +181,7 @@ def emit_lif_modules(prepared: SmvPrepared) -> str:
     for pset_name in used_paramsets:
         spec = prepared.param_specs[pset_name]
         validate_params(spec)
-        lines.extend(generate_lif_module(spec))
+        lines.extend(generate_lif_module(spec, max_input=_pset_max_input(prepared, pset_name)))
     return "\n".join(lines) + ("\n" if lines else "")
 
 

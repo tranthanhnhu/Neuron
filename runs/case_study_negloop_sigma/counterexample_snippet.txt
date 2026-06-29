@@ -4,12 +4,12 @@ Trace Type: Counterexample
     t = 0
     stim = FALSE
     a.P = 0
-    a.r_num = 1
+    a.r_num = 3
     a.in_hist_1 = 0
     a.in_hist_2 = 0
     a.in_hist_3 = 0
     b.P = 0
-    b.r_num = 1
+    b.r_num = 3
     b.in_hist_1 = 0
     b.in_hist_2 = 0
     b.in_hist_3 = 0
@@ -17,15 +17,72 @@ Trace Type: Counterexample
     a.window_sum = 0
     a.input_sum = 0
     a.S_leak = 4
-    a.tau = 6
+    a.tau = 2
     a.Pmax = 10
     b.spike = FALSE
     b.window_sum = 0
     b.input_sum = 0
     b.S_leak = 4
-    b.tau = 6
+    b.tau = 2
     b.Pmax = 10
--- specification AG (a.spike -> EF b.spike)  is false
+  -> State: 1.2 <-
+    t = 1
+    stim = TRUE
+    a.window_sum = 3
+    a.input_sum = 3
+  -> State: 1.3 <-
+    t = 2
+    stim = FALSE
+    a.P = 3
+    a.in_hist_1 = 3
+    a.spike = TRUE
+    a.window_sum = 2
+    a.input_sum = 0
+    b.window_sum = 3
+    b.input_sum = 3
+  -> State: 1.4 <-
+    t = 3
+    stim = TRUE
+    a.P = 0
+    a.in_hist_1 = 0
+    b.P = 3
+    b.in_hist_1 = 3
+    a.spike = FALSE
+    a.window_sum = 0
+    b.spike = TRUE
+    b.window_sum = 2
+    b.input_sum = 0
+  -> State: 1.5 <-
+    t = 4
+    b.P = 0
+    b.in_hist_1 = 0
+    a.window_sum = 3
+    a.input_sum = 3
+    b.spike = FALSE
+    b.window_sum = 0
+  -> State: 1.6 <-
+    t = 5
+    stim = FALSE
+    a.P = 3
+    a.in_hist_1 = 3
+    a.spike = TRUE
+    a.window_sum = 2
+    a.input_sum = 0
+    b.window_sum = 3
+    b.input_sum = 3
+  -> State: 1.7 <-
+    t = 6
+    a.P = 0
+    a.in_hist_1 = 0
+    b.P = 3
+    b.in_hist_1 = 3
+    a.spike = FALSE
+    a.window_sum = -3
+    a.input_sum = -3
+    b.spike = TRUE
+    b.window_sum = 2
+    b.input_sum = 0
+-- specification AG ((b.spike -> AF !b.spike) & (!b.spike -> AF b.spike))  is false
 -- as demonstrated by the following execution sequence
 Trace Description: CTL Counterexample 
 Trace Type: Counterexample 
@@ -33,12 +90,12 @@ Trace Type: Counterexample
     t = 0
     stim = FALSE
     a.P = 0
-    a.r_num = 1
+    a.r_num = 3
     a.in_hist_1 = 0
     a.in_hist_2 = 0
     a.in_hist_3 = 0
     b.P = 0
-    b.r_num = 1
+    b.r_num = 3
     b.in_hist_1 = 0
     b.in_hist_2 = 0
     b.in_hist_3 = 0
@@ -46,115 +103,58 @@ Trace Type: Counterexample
     a.window_sum = 0
     a.input_sum = 0
     a.S_leak = 4
-    a.tau = 6
+    a.tau = 2
     a.Pmax = 10
     b.spike = FALSE
     b.window_sum = 0
     b.input_sum = 0
     b.S_leak = 4
-    b.tau = 6
+    b.tau = 2
     b.Pmax = 10
   -> State: 2.2 <-
     t = 1
     stim = TRUE
-    a.window_sum = 5
-    a.input_sum = 5
+    a.window_sum = 3
+    a.input_sum = 3
   -> State: 2.3 <-
     t = 2
     stim = FALSE
-    a.P = 5
-    a.in_hist_1 = 5
-    a.window_sum = 1
+    a.P = 3
+    a.in_hist_1 = 3
+    a.spike = TRUE
+    a.window_sum = 2
     a.input_sum = 0
+    b.window_sum = 3
+    b.input_sum = 3
   -> State: 2.4 <-
     t = 3
     stim = TRUE
-    a.P = 1
+    a.P = 0
     a.in_hist_1 = 0
-    a.in_hist_2 = 5
-    a.window_sum = 5
-    a.input_sum = 5
+    b.P = 3
+    b.in_hist_1 = 3
+    a.spike = FALSE
+    a.window_sum = 0
+    b.spike = TRUE
+    b.window_sum = 2
+    b.input_sum = 0
   -> State: 2.5 <-
     t = 4
-    a.P = 5
-    a.in_hist_1 = 5
-    a.in_hist_2 = 0
-    a.in_hist_3 = 5
-    a.window_sum = 6
+    b.P = 0
+    b.in_hist_1 = 0
+    a.window_sum = 3
+    a.input_sum = 3
+    b.spike = FALSE
+    b.window_sum = 0
   -> State: 2.6 <-
     t = 5
     stim = FALSE
-    a.P = 6
-    a.in_hist_2 = 5
-    a.in_hist_3 = 0
+    a.P = 3
+    a.in_hist_1 = 3
     a.spike = TRUE
-    a.window_sum = 1
+    a.window_sum = 2
     a.input_sum = 0
-    b.window_sum = 5
-    b.input_sum = 5
--- specification AG (b.spike -> EF a.spike)  is true
--- specification AG ((a.spike -> AF !a.spike) & (!a.spike -> AF a.spike))  is false
--- as demonstrated by the following execution sequence
-Trace Description: CTL Counterexample 
-Trace Type: Counterexample 
-  -> State: 3.1 <-
-    t = 0
-    stim = FALSE
-    a.P = 0
-    a.r_num = 1
-    a.in_hist_1 = 0
-    a.in_hist_2 = 0
-    a.in_hist_3 = 0
-    b.P = 0
-    b.r_num = 1
-    b.in_hist_1 = 0
-    b.in_hist_2 = 0
-    b.in_hist_3 = 0
-    a.spike = FALSE
-    a.window_sum = 0
-    a.input_sum = 0
-    a.S_leak = 4
-    a.tau = 6
-    a.Pmax = 10
-    b.spike = FALSE
-    b.window_sum = 0
-    b.input_sum = 0
-    b.S_leak = 4
-    b.tau = 6
-    b.Pmax = 10
-  -> State: 3.2 <-
-    t = 1
-    stim = TRUE
-    a.window_sum = 5
-    a.input_sum = 5
-  -> State: 3.3 <-
-    t = 2
-    stim = FALSE
-    a.P = 5
-    a.in_hist_1 = 5
-    a.window_sum = 1
-    a.input_sum = 0
-  -> State: 3.4 <-
-    t = 3
-    stim = TRUE
-    a.P = 1
-    a.in_hist_1 = 0
-    a.in_hist_2 = 5
-    a.window_sum = 5
-    a.input_sum = 5
-  -> State: 3.5 <-
-    t = 4
-    a.P = 5
-    a.in_hist_1 = 5
-    a.in_hist_2 = 0
-    a.in_hist_3 = 5
-    a.window_sum = 6
-  -> State: 3.6 <-
-    t = 5
-    stim = FALSE
-    a.P = 6
-    a.in_hist_2 = 5
-    a.in_hist_3 = 0
-    a.spike = TRUE
-    a.window_sum = 1
-    a.input_sum = 0
+    b.window_sum = 3
+    b.input_sum = 3
+  -> State: 2.7 <-
+    t = 6

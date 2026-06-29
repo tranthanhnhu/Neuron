@@ -11,17 +11,17 @@
     {
       "src": "stim",
       "dst": "a",
-      "weight": 5
+      "weight": 3
     },
     {
       "src": "a",
       "dst": "b",
-      "weight": 5
+      "weight": 3
     },
     {
       "src": "b",
       "dst": "a",
-      "weight": -5
+      "weight": -3
     }
   ],
   "params": {
@@ -59,8 +59,8 @@
     }
   },
   "neuron_params": {
-    "a": "slow",
-    "b": "slow"
+    "a": "quick",
+    "b": "quick"
   },
   "compositions": [],
   "schedules": {

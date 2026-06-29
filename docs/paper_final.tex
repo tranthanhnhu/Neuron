@@ -636,10 +636,10 @@ bounded $\sigma$-window LI\&F update of Section~\ref{sec:lif}.
 
 We consider three qualitatively different parameter sets, or presets,
 characterised by their firing threshold and leak factor: \emph{slow},
-\emph{intermediate}, and \emph{fast}. A \emph{slow} neuron takes longer to
+\emph{intermediate}, and \emph{quick}. A \emph{slow} neuron takes longer to
 reach its firing threshold, since its membrane potential leaks away more
 quickly and a higher threshold must be overcome before a spike is emitted;
-conversely, a \emph{fast} neuron reaches its threshold more readily, as its
+conversely, a \emph{quick} neuron reaches its threshold more readily, as its
 potential decays more slowly and accumulates input more effectively,
 allowing it to spike sooner. \emph{Intermediate} neurons exhibit a
 behaviour in between these two extremes. The three presets share the same
@@ -716,7 +716,9 @@ The case-study network contains two neurons \texttt{a} and \texttt{b} and one Bo
 input \texttt{stim}. The \texttt{negative\_loop} block macro expands into three weighted
 edges: excitation from \texttt{stim} to \texttt{a}, excitation from \texttt{a} to
 \texttt{b}, and inhibition from \texttt{b} back to \texttt{a}. Both neurons use the
-\texttt{slow} parameter set. A fixed input schedule drives
+\texttt{quick} parameter set ($\tau = 2$, leak $R/S = 3/4$), the only one of the three
+fixed neuron types under which the inhibited neuron can fire and the loop can sustain
+alternating activity while it is driven (Section~\ref{subsec:case-results}). A fixed input schedule drives
 \texttt{stim} for the first five discrete time steps; afterwards the input becomes
 nondeterministic, allowing NuSMV to explore alternative stimulus continuations within the
 simulation horizon $t \in \{0,\ldots,20\}$.
@@ -735,7 +737,7 @@ include neuron_base.dsl
 input stim
 schedule stim values TRUE FALSE TRUE TRUE FALSE
 
-block negative_loop input=stim A=a B=b params=intermediate
+block negative_loop input=stim A=a B=b params=quick
 \end{lstlisting}
 
 The parser produces a \texttt{NetworkIR} with two neurons, three edges,
@@ -755,33 +757,36 @@ Following Fig.~\ref{fig:pipeline_flow}, the tool parses and validates the
 emits \texttt{model.smv}, \texttt{properties.smv}, and
 \texttt{combined.smv}, invokes NuSMV, and writes the six numbered report
 files (\texttt{step1\_diagram.md} through \texttt{step6\_results.txt}).
-NuSMV returned exit code~0; the tool exit code was~1 because five
+NuSMV returned exit code~0; the tool exit code was~1 because two
 specifications were refuted (Section~\ref{subsec:case-results}).
 
 \subsection{Generated NuSMV Model}
 
 Listing~\ref{lst:case-model} excerpts the generated \texttt{MODULE main} and the
-\texttt{lif\_slow} submodule. The global clock \texttt{t} ranges over $0..20$. Weighted
+\texttt{lif\_quick} submodule. The global clock \texttt{t} ranges over $0..20$. Weighted
 synaptic inputs are computed per edge in the main module (\texttt{net\_exc} /
-\texttt{net\_inh} arguments).
+\texttt{net\_inh} arguments). The history registers are sized to the reachable input
+magnitude ($\pm 3$) and the $\sigma$-window is truncated to its effective integer length
+($\sigma = 3$): terms whose integer contribution is identically zero are dropped, leaving
+every computed value unchanged while keeping the state space small.
 
 \begin{lstlisting}[style=smvcode,caption={Excerpt of generated \texttt{model.smv} (case study).},label=lst:case-model]
 MODULE main
 VAR
   t : 0..20;
   stim : boolean;
-  a : lif_slow(((stim) ? 5 : 0), ((b.spike) ? -5 : 0), t);
-  b : lif_slow(((a.spike) ? 5 : 0), 0, t);
+  a : lif_quick(((stim) ? 3 : 0), ((b.spike) ? -3 : 0), t);
+  b : lif_quick(((a.spike) ? 3 : 0), 0, t);
 
-MODULE lif_slow(net_exc, net_inh, t)
+MODULE lif_quick(net_exc, net_inh, t)
 VAR  P : 0..10;  r_num : 0..4;
-     in_hist_1 : -10..10;  in_hist_2 : -10..10;  in_hist_3 : -10..10;
+     in_hist_1 : -3..3;  in_hist_2 : -3..3;  in_hist_3 : -3..3;
 DEFINE
-  input_sum := net_exc + net_inh;
+  input_sum := net_exc + net_inh;  -- tau = 2
   window_sum := input_sum + (r_num*in_hist_1)/S_leak + ...;
   spike := (P >= tau);
 ASSIGN
-  init(r_num) := 1;  next(in_hist_1) := spike ? 0 : input_sum;
+  init(r_num) := 3;  next(in_hist_1) := spike ? 0 : input_sum;
   next(P) := case spike : 0; window_sum > Pmax : Pmax;
                  TRUE : window_sum; esac;
 \end{lstlisting}
@@ -791,56 +796,52 @@ ASSIGN
 
 The property emitter concatenates two groups (Section~\ref{sec:pipeline}): eight
 baseline LIF invariants (four per neuron: reset on spike, membrane bounds,
-spike--threshold equivalence, and fixed leak factor) and nine archetype templates
-for \texttt{negative\_loop} on \texttt{[a,b]}---mutual exclusion, reachability,
-bidirectional CTL propagation---plus four additional specifications emitted for the
+spike--threshold equivalence, and fixed leak factor) and eight archetype templates
+for \texttt{negative\_loop} on \texttt{[a,b]}---mutual exclusion, two reachability
+checks, two CTL feedback formulas, two recurrent-oscillation formulas, and one LTL
+quiescence property---plus four additional specifications emitted for the
 graph-detected \texttt{simple\_series} on the same excitatory link (duplicate
-reachability and propagation checks). In total NuSMV checked \textbf{seventeen}
+reachability and propagation checks). In total NuSMV checked \textbf{twenty}
 specifications for this input (Table~\ref{tab:case-results}).
 
 \subsection{Verification Results}
 \label{subsec:case-results}
 
-We first instantiated the negative-loop archetype with the \texttt{slow}
-parameter set for both neurons. Under this configuration, all eight baseline
-LIF invariants and the mutual exclusion property
-$\neg(a.\mathit{spike} \land b.\mathit{spike})$ held, together with
-reachability of neuron~\texttt{a} ($\mathbf{EF}\, a.\mathit{spike}$) and the
-inhibitory feedback property
-$b.\mathit{spike} \Rightarrow \mathbf{EF}\, a.\mathit{spike}$. However, the
-oscillation properties that we expected from a negative loop---namely that
-\texttt{a} and \texttt{b} should keep firing in alternation, each
-eventually triggering the other---were refuted: reachability of
-neuron~\texttt{b} ($\mathbf{EF}\, b.\mathit{spike}$) was \textbf{false}, and
-so were the propagation formulas
-$a.\mathit{spike} \Rightarrow \mathbf{EF}\, b.\mathit{spike}$.
+The choice of parameter set is dictated by a structural condition for oscillation
+in the two-neuron negative loop: the downstream neuron can cross its threshold from
+a single presynaptic pulse only when $w_{exc} \ge \tau$. Among the three fixed neuron
+types this inequality holds only for the \texttt{quick} preset
+($\tau = 2 \le w_{exc} = 3$); for \texttt{intermediate} ($3 < 4$) and \texttt{slow}
+($5 < 6$) we verified that $\mathbf{EF}\, b.\mathit{spike}$ is \textbf{false}---the
+inhibited neuron never reaches its threshold and the loop cannot oscillate at all. We
+therefore instantiate both neurons with \texttt{quick}.
 
-NuSMV's counterexample trace explained why: with $\tau = 6$ and the
-\texttt{slow} leak factor, \texttt{a} spikes at $t=5$ while \texttt{b} only
-accumulates a potential of $P=5$ at $t=6$---just below threshold---after
-which it leaks back to zero and never fires for the rest of the horizon.
-In other words, the chosen parameters made \texttt{b} too sluggish to ever
-cross its threshold within the simulation window, even though the wiring
-of the archetype was correct. This trace suggested that the \texttt{slow}
-preset, while suitable for the structural invariants, was simply too slow
-for the inhibitory branch of the loop to actually oscillate.
+Under \texttt{quick}, NuSMV verified \textbf{eighteen} of the twenty specifications.
+All eight baseline LIF invariants hold, together with the mutual exclusion property
+$\mathbf{AG}\,\neg(a.\mathit{spike} \land b.\mathit{spike})$, the reachability of
+both neurons ($\mathbf{EF}\, a.\mathit{spike}$, $\mathbf{EF}\, b.\mathit{spike}$),
+the bidirectional feedback $\mathbf{AG}(a.\mathit{spike} \Rightarrow \mathbf{EF}\,
+b.\mathit{spike})$ and $\mathbf{AG}(b.\mathit{spike} \Rightarrow \mathbf{EF}\,
+a.\mathit{spike})$, and the LTL quiescence property $\mathbf{G}\,\neg\mathit{stim}
+\Rightarrow \mathbf{G}\,(\neg a.\mathit{spike} \land \neg b.\mathit{spike})$. The loop
+now propagates in both directions: a representative trace alternates \texttt{a} firing
+at $t = 2$, \texttt{b} at $t = 3$, \texttt{a} again at $t = 5$, and \texttt{b} at
+$t = 6$---the characteristic back-and-forth of a negative feedback loop.
 
-Guided by this counterexample, we re-instantiated the same archetype with
-the \texttt{intermediate} parameter set, keeping the topology and the input
-schedule unchanged. Under \texttt{intermediate}, neuron~\texttt{b} now reaches its
-firing threshold before the potential decays, and all previously refuted
-properties became \textbf{true}: $\mathbf{EF}\, b.\mathit{spike}$ holds, the
-propagation formulas
-$a.\mathit{spike} \Rightarrow \mathbf{EF}\, b.\mathit{spike}$ hold, and the
-archetype now exhibits the expected oscillatory behaviour, with \texttt{a}
-and \texttt{b} alternating spikes as the negative feedback loop is
-traversed. Table~\ref{tab:case-results} reports the final outcome for the
-\texttt{intermediate} configuration, and keeps the \texttt{slow}-parameter
-counterexample as a witness of the refinement step that led to it.
+The only two refuted specifications are the recurrent-oscillation formulas
+$\mathbf{AG}(s.\mathit{spike} \Rightarrow \mathbf{AF}\,\neg s.\mathit{spike}) \land
+\mathbf{AG}(\neg s.\mathit{spike} \Rightarrow \mathbf{AF}\, s.\mathit{spike})$ for
+$s \in \{a, b\}$. This is not a wiring defect but a consequence of the open-loop
+drive: after the scheduled prefix the stimulus becomes nondeterministic, and on the
+path where \texttt{stim} stays low the loop correctly falls silent, so the clause
+``always eventually spikes again'' cannot hold. The negative loop oscillates while it
+is driven but does not self-sustain---exactly the behaviour expected of an
+input-dependent feedback circuit---and NuSMV's counterexample makes this dependence
+explicit. Table~\ref{tab:case-results} summarises the outcome.
 
 \begin{table}
 \centering
-\caption{Verification results for \texttt{negloop\_only.dsl} (horizon~20, \texttt{params=intermediate}). The reachability, propagation, and oscillation properties were refuted under \texttt{params=slow} and became true after switching to \texttt{intermediate} (see discussion above).}
+\caption{Verification results for \texttt{negloop\_only.dsl} (horizon~20, \texttt{params=quick}): eighteen specifications hold and two are refuted. Only the recurrent-oscillation formulas fail, because the input-driven loop is allowed to fall silent once the stimulus stops (see discussion above).}
 \label{tab:case-results}
 \small
 \begin{tabular}{@{}p{0.52\linewidth}cc@{}}
@@ -853,10 +854,67 @@ Reachability $\mathbf{EF}\, a.\mathit{spike}$ & CTL & true (2 checks) \\
 Reachability $\mathbf{EF}\, b.\mathit{spike}$ & CTL & true (2 checks) \\
 Propagation $a.\mathit{spike} \Rightarrow \mathbf{EF}\, b.\mathit{spike}$ & CTL & true (3 checks) \\
 Feedback $b.\mathit{spike} \Rightarrow \mathbf{EF}\, a.\mathit{spike}$ & CTL & true \\
-Oscillation $AG(spike \Rightarrow AF \lnot spike) \land AG(\lnot spike \Rightarrow AF\, spike)$ (\texttt{a}, \texttt{b}) & CTL & true (2) \\
+Oscillation $AG(spike \Rightarrow AF \lnot spike) \land AG(\lnot spike \Rightarrow AF\, spike)$ (\texttt{a}, \texttt{b}) & CTL & false (2) \\
+Quiescence $\mathbf{G}\,\lnot stim \Rightarrow \mathbf{G}(\lnot a.\mathit{spike} \land \lnot b.\mathit{spike})$ & LTL & true \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\subsection{Evaluation: Model Size and Verification Cost}
+\label{subsec:case-eval}
+
+Beyond the qualitative outcome, we report the quantitative cost of the analysis, since
+tractability is a central concern for symbolic model checking of LIF networks. All
+measurements use NuSMV~2.7.1 (win64) with BDD dynamic variable reordering enabled (the
+\texttt{-dynamic} flag passed by \texttt{snn\_mc}).
+
+The generated model is compact: two neurons, one Boolean input, and three weighted edges.
+Each neuron contributes the membrane potential \texttt{P}~$\in[0,10]$, the fixed leak
+register \texttt{r\_num}, and three history registers \texttt{in\_hist\_1..3}~$\in[-3,3]$;
+together with the global clock \texttt{t}~$\in[0,20]$ and \texttt{stim}, the symbolic
+encoding declares a state space of about $1.5\times 10^{10}$ states ($2^{33.8}$).
+Exhaustive reachability analysis collapses this to only \textbf{326} reachable states,
+represented by $17{,}034$ BDD nodes, and NuSMV checks all twenty CTL/LTL specifications in
+under \textbf{0.1\,s}; the complete pipeline (parsing, emission, verification, and report
+generation) finishes in roughly $0.2$\,s.
+
+These figures depend critically on the integer-aware $\sigma$-window truncation built into
+the model emitter (Listing~\ref{lst:case-model}). Table~\ref{tab:case-eval} compares the
+model produced by \texttt{snn\_mc} against the naive encoding that keeps the full analytic
+window ($\sigma = 8$) and the worst-case history range ($[-10,10]$). Truncating the window
+to its effective integer length and sizing the registers to the reachable input magnitude
+shrinks the declared state space from $2^{87.2}$ to $2^{33.8}$ and the BDD from $168{,}596$
+to $17{,}034$ nodes, turning a verification that does not terminate within five minutes into
+one that completes in under a tenth of a second---without changing a single computed
+membrane value. The two encodings agree on every \texttt{P} and \texttt{spike} trajectory;
+the optimized model merely omits observationally redundant history bits, which is also why
+it exposes fewer reachable states ($326$ versus $536$).
+
+\begin{table}
+\centering
+\caption{Verification cost of the case study and the effect of the integer-aware $\sigma$-window truncation. The naive column keeps the full analytic window and the worst-case history range; the \texttt{snn\_mc} column is the model actually emitted. Both runs use identical properties and the same NuSMV configuration.}
+\label{tab:case-eval}
+\small
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Metric} & \textbf{Naive ($\sigma{=}8$)} & \textbf{\texttt{snn\_mc} ($\sigma{=}3$)} \\
+\midrule
+Effective window length $\sigma$        & 8            & 3 \\
+History registers per neuron            & 8            & 3 \\
+History register range                  & $[-10,10]$   & $[-3,3]$ \\
+Declared state space                    & $2^{87.2}$   & $2^{33.8}$ \\
+Reachable states                        & 536          & 326 \\
+BDD nodes (allocated)                    & $168{,}596$  & $17{,}034$ \\
+20-spec verification time               & $>300$\,s (timeout) & $0.08$\,s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Because the encoding is per neuron and the property set grows linearly with the number of
+archetype instances, the dominant cost is the BDD representation of the joint neuron state.
+The case study confirms that, for the small motifs that make up the archetype catalogue,
+this cost stays well within interactive range, and that the integer-aware $\sigma$
+truncation is what keeps high-retention presets such as \texttt{quick} tractable.
 
 % ---------------------------------------------------------------
 \section{Conclusion and Future Work}
@@ -868,10 +926,12 @@ specifies LIF parameters, connectivity, and archetype blocks; the tool compiles 
 discrete-time model, emits baseline LIF invariants and archetype-specific CTL/LTL
 templates, and reports verification outcomes together with counterexample traces when
 properties are refuted. The negative-loop case study (Section~\ref{sec:case-study})
-illustrated both sides of this methodology: structural safety properties and membrane
-invariants were confirmed, while reachability and propagation claims were refuted in
-informative ways, with NuSMV traces linking formal failure to concrete membrane
-dynamics and guiding parameter refinement.
+illustrated both sides of this methodology: structural safety properties, membrane
+invariants, mutual exclusion, reachability, and bidirectional propagation were confirmed,
+while the strongest recurrent-oscillation claims were refuted because the input-driven loop
+may fall silent once stimulation ceases. NuSMV's counterexamples linked each outcome to
+concrete membrane dynamics and guided the choice of neuron parameters (the oscillation
+condition $w_{exc} \ge \tau$).
 
 The central long-term direction is \emph{compositional} verification: moving from
 isolated archetypes to networks obtained by coupling the output(s) of one archetype

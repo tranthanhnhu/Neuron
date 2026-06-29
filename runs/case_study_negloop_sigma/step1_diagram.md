@@ -9,9 +9,9 @@ flowchart LR
   stim["stim (input)"]
   a["a (output)"]
   b["b (output)"]
-  stim -->|"exc w=5"| a
-  a -->|"exc w=5"| b
-  b -.->|"inh w=-5"| a
+  stim -->|"exc w=3"| a
+  a -->|"exc w=3"| b
+  b -.->|"inh w=-3"| a
 ```
 
 ## ASCII
@@ -23,6 +23,6 @@ Inputs (1): ['stim']
 Neurons (2): ['a', 'b']
 
 Edges per destination neuron:
-  a <- exc: [('stim', 5)]    inh: [('b', -5)]
-  b <- exc: [('a', 5)]    inh: []
+  a <- exc: [('stim', 3)]    inh: [('b', -3)]
+  b <- exc: [('a', 3)]    inh: []
 ```

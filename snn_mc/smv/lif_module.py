@@ -44,6 +44,28 @@ def _hist_bound(spec: ParamSpec) -> int:
     return spec.Pmax
 
 
+def effective_window(spec: ParamSpec, hist_bound: int) -> int:
+    """
+    Largest window index ``e`` in ``[1, spec.sigma]`` whose σ-window term can be non-zero
+    given that every input-history register stays within ``[-hist_bound, hist_bound]``.
+
+    The term for index ``e`` is ``(R^e * in_hist_e) / S^e`` under integer division, so it is
+    identically zero whenever ``R^e * hist_bound < S^e``. Because ``(R/S)^e`` is strictly
+    decreasing, once a term vanishes every later term vanishes too. Dropping those always-zero
+    terms leaves the computed membrane potential unchanged while shrinking the state space the
+    model checker must explore (e.g. the high-leak ``quick`` preset collapses from σ=8 to σ=3
+    when the reachable input magnitude is 3).
+    """
+    hb = max(1, int(hist_bound))
+    eff = 1
+    for e in range(1, spec.sigma + 1):
+        if (spec.R_init ** e) * hb >= (spec.S ** e):
+            eff = e
+        else:
+            break
+    return eff
+
+
 def _window_sum_expr(sigma: int) -> str:
     terms: List[str] = ["input_sum"]
     for e in range(1, sigma + 1):
@@ -94,14 +116,23 @@ def validate_params(spec: ParamSpec) -> None:
         )
 
 
-def generate_lif_module(spec: ParamSpec) -> List[str]:
+def generate_lif_module(spec: ParamSpec, *, max_input: int | None = None) -> List[str]:
     """
-    INPUT: ParamSpec describing one LIF parameter set.
+    INPUT:
+        spec       — ParamSpec describing one LIF parameter set.
+        max_input  — optional upper bound on the reachable ``|input_sum|`` for neurons of this
+                     set (from the actual edge weights). When given, the σ-window is truncated
+                     to its effective integer length and the history registers are sized to this
+                     bound, which keeps high-σ presets tractable without changing any computed value.
     OUTPUT: list of NuSMV lines defining ``MODULE lif_<spec.name>(net_exc, net_inh, t)``.
     """
     mod_name = f"lif_{spec.name}"
-    sigma = spec.sigma
-    hbound = _hist_bound(spec)
+    if max_input is None:
+        sigma = spec.sigma
+        hbound = _hist_bound(spec)
+    else:
+        hbound = max(1, int(max_input))
+        sigma = effective_window(spec, hbound)
     lines: List[str] = []
     lines.append(
         f"-- LIF module '{mod_name}': tau={spec.tau}, sigma={sigma}, "
