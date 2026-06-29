@@ -20,6 +20,7 @@ from snn_mc.archetypes.base import (
     ARCHETYPE_LIST_MAX,
 )
 from snn_mc.archetypes.graph_index import GraphIndex
+from snn_mc.archetypes.spec_templates import ef_each, section, stim_implies_f
 
 
 def _expand_outputs(kv: Dict[str, str], ctx: BlockApplyContext) -> List[str]:
@@ -91,15 +92,24 @@ class ParallelCompositionArchetype(ArchetypeBase):
         neurons: Optional[FrozenSet[str]] = None,
         horizon: int = 20,
     ) -> List[str]:
-        """OUTPUT: per-output reachability + liveness when the source spikes."""
+        """OUTPUT: per-output reachability + fan-out propagation + input liveness."""
         ns = inst.nodes
         stim = stim_token(inst.inputs.get("stim"), neurons)
         src = inst.meta.get("src") or (ns[0] if ns else None)
         outs = [n for n in ns if n != src]
-        lines = [f"CTLSPEC EF {n}.spike" for n in ns]
-        if stim and src and outs:
+        lines: List[str] = []
+        lines.extend(ef_each(ns))
+        if src and outs:
+            lines.append(section("Fan-out"))
+            for o in outs:
+                lines.append(f"CTLSPEC AG ({src}.spike -> EF {o}.spike)")
+            lines.append(section("Co-activation"))
+            co = " & ".join([f"{o}.spike" for o in outs])
+            lines.append(f"CTLSPEC EF ({co})")
+        if stim and outs:
+            lines.append(section("Input-response"))
             or_out = " | ".join([f"{o}.spike" for o in outs])
-            lines.append(f"LTLSPEC (G {stim}) -> (F ({or_out}))")
+            lines.append(stim_implies_f(stim, f"({or_out})"))
         return lines
 
     @classmethod

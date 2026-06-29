@@ -1,0 +1,102 @@
+{
+  "neurons": [
+    "a",
+    "b"
+  ],
+  "inputs": [
+    "stim"
+  ],
+  "consts": {},
+  "edges": [
+    {
+      "src": "stim",
+      "dst": "a",
+      "weight": 3
+    },
+    {
+      "src": "a",
+      "dst": "b",
+      "weight": 3
+    },
+    {
+      "src": "b",
+      "dst": "a",
+      "weight": -3
+    }
+  ],
+  "params": {
+    "default": {
+      "tau": 4,
+      "w_exc": 3,
+      "w_inh": -3,
+      "S": 4,
+      "R_init": 2,
+      "Pmax": 10
+    },
+    "intermediate": {
+      "tau": 4,
+      "w_exc": 3,
+      "w_inh": -3,
+      "S": 4,
+      "R_init": 2,
+      "Pmax": 10
+    },
+    "quick": {
+      "tau": 2,
+      "w_exc": 3,
+      "w_inh": -3,
+      "S": 4,
+      "R_init": 3,
+      "Pmax": 10
+    },
+    "slow": {
+      "tau": 6,
+      "w_exc": 5,
+      "w_inh": -5,
+      "S": 4,
+      "R_init": 1,
+      "Pmax": 10
+    }
+  },
+  "neuron_params": {
+    "a": "intermediate",
+    "b": "intermediate"
+  },
+  "compositions": [],
+  "schedules": {
+    "stim": [
+      true,
+      false,
+      true,
+      true,
+      false
+    ]
+  },
+  "user_specs": [],
+  "archetypes": [
+    {
+      "kind": "negative_loop",
+      "nodes": [
+        "a",
+        "b"
+      ],
+      "inputs": {
+        "stim": "stim"
+      },
+      "meta": {
+        "outputs": [
+          "a",
+          "b"
+        ]
+      },
+      "explicit": true
+    }
+  ],
+  "neuron_roles": {},
+  "input_ties": {},
+  "horizon": 20,
+  "network_outputs": [
+    "a",
+    "b"
+  ]
+}

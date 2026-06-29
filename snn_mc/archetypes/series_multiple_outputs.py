@@ -14,6 +14,13 @@ from snn_mc.archetypes.block_helpers import exc_weights_for_chain
 from snn_mc.ir import ArchetypeInstance, Composition, Edge
 from snn_mc.archetypes.base import ArchetypeBase, BlockApplyContext, expand_chain, stim_token
 from snn_mc.archetypes.graph_index import GraphIndex
+from snn_mc.archetypes.spec_templates import (
+    ctl_propagate_chain,
+    ef_each,
+    section,
+    silence_without_stim,
+    stim_implies_f,
+)
 
 
 class SeriesMultipleOutputsArchetype(ArchetypeBase):
@@ -55,13 +62,19 @@ class SeriesMultipleOutputsArchetype(ArchetypeBase):
         neurons: Optional[FrozenSet[str]] = None,
         horizon: int = 20,
     ) -> List[str]:
-        """OUTPUT: per-neuron reachability + global silence when stim is off."""
+        """OUTPUT: reachability, chain propagation, silence without stim, input liveness."""
         ns = inst.nodes
         stim = stim_token(inst.inputs.get("stim"), neurons)
-        lines = [f"CTLSPEC EF {n}.spike" for n in ns]
+        lines: List[str] = []
+        lines.extend(ef_each(ns))
+        if len(ns) >= 2:
+            lines.extend(ctl_propagate_chain(ns))
         if stim and ns:
-            silent = " & ".join([f"!{n}.spike" for n in ns])
-            lines.append(f"LTLSPEC (G !{stim}) -> (G ({silent}))")
+            lines.append(section("Silence"))
+            lines.append(silence_without_stim(stim, ns))
+            lines.append(section("Input-response"))
+            or_ns = " | ".join([f"{n}.spike" for n in ns])
+            lines.append(stim_implies_f(stim, f"({or_ns})"))
         return lines
 
     @classmethod

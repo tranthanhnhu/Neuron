@@ -1,0 +1,11 @@
+Step 4 - Composition
+====================
+
+Archetype instances:
+  [1] kind=negative_loop  (explicit (block ...))
+        nodes = ['a', 'b']
+        inputs = {'stim': 'stim'}
+        outputs = ['a', 'b']
+  [2] kind=simple_series  (graph-detected)
+        nodes = ['a', 'b']
+        outputs = ['b']

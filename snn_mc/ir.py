@@ -45,8 +45,9 @@ class ParamSpec:
       - ``w_exc``   weight of every excitatory edge entering the neuron (>= 0).
       - ``w_inh``   weight of every inhibitory edge entering the neuron (<= 0).
       - ``S``       leak denominator. Effective leak rate is ``R_init / S`` in [0, 1].
-      - ``R_init``  initial numerator of the leak; non-deterministic later.
+      - ``R_init``  initial numerator of the leak (fixed at ``R_init`` for the run).
       - ``Pmax``    upper clamp on the membrane potential.
+      - ``sigma``   temporal integration window (De Maria: floor(ln eps / ln(R/S))).
     """
 
     name: str
@@ -56,6 +57,7 @@ class ParamSpec:
     S: int
     R_init: int
     Pmax: int
+    sigma: int = 1
 
 
 @dataclass(frozen=True)
@@ -180,6 +182,7 @@ def clone_param_with_tau(
         S=b.S,
         R_init=b.R_init,
         Pmax=b.Pmax,
+        sigma=b.sigma,
     )
     return key
 

@@ -12,6 +12,7 @@ from typing import Dict, FrozenSet, List, Optional
 from snn_mc.ir import ArchetypeInstance, Edge
 from snn_mc.archetypes.base import ArchetypeBase, BlockApplyContext, stim_token
 from snn_mc.archetypes.graph_index import GraphIndex
+from snn_mc.archetypes.spec_templates import ef_each, section
 
 
 class InhibitionOfBehaviorArchetype(ArchetypeBase):
@@ -51,16 +52,19 @@ class InhibitionOfBehaviorArchetype(ArchetypeBase):
         neurons: Optional[FrozenSet[str]] = None,
         horizon: int = 20,
     ) -> List[str]:
-        """OUTPUT: when I is active, T stays silent; when I is silent and stimT is sustained, T eventually spikes."""
+        """OUTPUT: inhibition gating, release under stimT, and per-neuron reachability."""
         ns = inst.nodes
         if len(ns) < 2:
             return []
         i, t = ns[0], ns[1]
         stim_t = stim_token(inst.inputs.get("stimT"), neurons)
-        lines = [
-            f"LTLSPEC (G {i}.spike) -> (G !{t}.spike)",
-        ]
+        lines: List[str] = []
+        lines.extend(ef_each([i, t]))
+        lines.append(section("Inhibition-gating"))
+        lines.append(f"LTLSPEC (G {i}.spike) -> (G !{t}.spike)")
+        lines.append(f"CTLSPEC AG ({i}.spike -> AG !{t}.spike)")
         if stim_t:
+            lines.append(section("Release"))
             lines.append(
                 f"LTLSPEC (G ({stim_t} & !{i}.spike)) -> (F {t}.spike)"
             )

@@ -24,6 +24,12 @@ from snn_mc.archetypes.base import (
     stim_token,
 )
 from snn_mc.archetypes.graph_index import GraphIndex
+from snn_mc.archetypes.spec_templates import (
+    ctl_propagate_chain,
+    ef_each,
+    section,
+    stim_implies_f,
+)
 
 
 class SimpleSeriesArchetype(ArchetypeBase):
@@ -70,11 +76,18 @@ class SimpleSeriesArchetype(ArchetypeBase):
         horizon: int = 20,
     ) -> List[str]:
         ns = inst.nodes
+        if len(ns) < 2:
+            return []
+        lines: List[str] = []
+        lines.extend(ef_each(ns))
+        lines.extend(ctl_propagate_chain(ns))
+        lines.append(section("End-to-end"))
+        lines.append(f"CTLSPEC AG ({ns[0]}.spike -> EF {ns[-1]}.spike)")
         stim = stim_token(inst.inputs.get("stim"), neurons)
-        if stim and len(ns) >= 2:
-            last = ns[-1]
-            return [f"LTLSPEC (G {stim}) -> (F {last}.spike)"]
-        return []
+        if stim:
+            lines.append(section("Input-response"))
+            lines.append(stim_implies_f(stim, f"{ns[-1]}.spike"))
+        return lines
 
     @classmethod
     def detect(cls, idx: GraphIndex) -> List[ArchetypeInstance]:

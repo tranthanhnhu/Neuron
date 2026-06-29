@@ -20,10 +20,16 @@ from snn_mc.archetypes.base import (
     ArchetypeBase,
     BlockApplyContext,
     expand_chain,
-    stim_token,
     validate_archetype_list_size,
 )
 from snn_mc.archetypes.graph_index import GraphIndex
+from snn_mc.archetypes.spec_templates import (
+    ctl_propagate_chain,
+    ef_each,
+    mutual_exclusion,
+    oscillation_section,
+    section,
+)
 
 
 def _longest_simple_exc_path(
@@ -113,25 +119,16 @@ class NegativeLoopArchetype(ArchetypeBase):
         if len(ns) < 2:
             return []
         n_first, n_last = ns[0], ns[-1]
-        h = horizon
-        specs: List[str] = [
-            f"CTLSPEC AG !({n_first}.spike & {n_last}.spike)",
-        ]
-        for i in range(len(ns) - 1):
-            specs.append(
-                f"LTLSPEC G (({ns[i]}.spike & t < {h}) -> (F (t <= {h} & {ns[i + 1]}.spike)))"
-            )
-        for n in ns:
-            specs.append(f"CTLSPEC EF {n}.spike")
-        stim = stim_token(inst.inputs.get("stim"), neurons)
-        if stim and len(ns) == 2:
-            specs.append(
-                "-- Bounded alternation (optional; tune schedule / LIF if this fails)"
-            )
-            specs.append(
-                f"LTLSPEC G (({stim} & t < {h}) -> F (t <= {h} & {n_last}.spike & !{n_first}.spike))"
-            )
-        return specs
+        lines: List[str] = [section("Safety"), mutual_exclusion(n_first, n_last)]
+        lines.extend(ef_each(ns))
+        if len(ns) == 2:
+            lines.append(section("Feedback"))
+            lines.append(f"CTLSPEC AG ({n_first}.spike -> EF {n_last}.spike)")
+            lines.append(f"CTLSPEC AG ({n_last}.spike -> EF {n_first}.spike)")
+            lines.extend(oscillation_section(ns))
+        else:
+            lines.extend(ctl_propagate_chain(ns))
+        return lines
 
     @classmethod
     def detect(cls, idx: GraphIndex) -> List[ArchetypeInstance]:

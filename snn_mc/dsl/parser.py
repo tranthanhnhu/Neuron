@@ -45,6 +45,29 @@ from snn_mc.ir import (
     parse_kv_pairs,
     parse_roles_csv,
 )
+from snn_mc.smv.lif_module import compute_sigma
+
+
+def _param_spec(
+    name: str,
+    *,
+    tau: int,
+    w_exc: int,
+    w_inh: int,
+    S: int,
+    R_init: int,
+    Pmax: int,
+) -> ParamSpec:
+    return ParamSpec(
+        name=name,
+        tau=tau,
+        w_exc=w_exc,
+        w_inh=w_inh,
+        S=S,
+        R_init=R_init,
+        Pmax=Pmax,
+        sigma=compute_sigma(R_init, S),
+    )
 
 _MAX_INCLUDE_DEPTH = 32
 
@@ -140,8 +163,8 @@ def _parse_body(text: str, *, override_n: Optional[int]) -> NetworkIR:
     network_outputs: List[str] = []
 
     # The default LIF parameter set matches the values fixed with the supervisor.
-    params["default"] = ParamSpec(
-        name="default",
+    params["default"] = _param_spec(
+        "default",
         tau=4,
         w_exc=3,
         w_inh=-3,
@@ -149,16 +172,15 @@ def _parse_body(text: str, *, override_n: Optional[int]) -> NetworkIR:
         R_init=2,
         Pmax=10,
     )
-    # Built-in neuron "types" (supervisor's Quick / Intermediate / Slow taxonomy).
     # A type is the pair (threshold tau, leak factor R/S); leak is FIXED per type
     # (see lif_module: next(r_num) := r_num). 'slow' needs a larger w_exc so that a
     # high-threshold/low-leak neuron can still reach tau (P_ss = w_exc/(1-R/S) >= tau).
-    for _spec in (
-        ParamSpec(name="quick", tau=2, w_exc=3, w_inh=-3, S=4, R_init=3, Pmax=10),
-        ParamSpec(name="intermediate", tau=4, w_exc=3, w_inh=-3, S=4, R_init=2, Pmax=10),
-        ParamSpec(name="slow", tau=6, w_exc=5, w_inh=-5, S=4, R_init=1, Pmax=10),
+    for spec in (
+        _param_spec("quick", tau=2, w_exc=3, w_inh=-3, S=4, R_init=3, Pmax=10),
+        _param_spec("intermediate", tau=4, w_exc=3, w_inh=-3, S=4, R_init=2, Pmax=10),
+        _param_spec("slow", tau=6, w_exc=5, w_inh=-5, S=4, R_init=1, Pmax=10),
     ):
-        params[_spec.name] = _spec
+        params[spec.name] = spec
 
     def parse_csv_list(val: str, line_no: int) -> List[str]:
         items = [x.strip() for x in val.split(",") if x.strip()]
@@ -206,14 +228,16 @@ def _parse_body(text: str, *, override_n: Optional[int]) -> NetworkIR:
                     return default
                 return int(kv[key])
 
-            spec = ParamSpec(
-                name=name,
+            R_init = get_int("R", params["default"].R_init)
+            Pmax = get_int("Pmax", params["default"].Pmax)
+            spec = _param_spec(
+                name,
                 tau=get_int("tau", params["default"].tau),
                 w_exc=get_int("w_exc", params["default"].w_exc),
                 w_inh=get_int("w_inh", params["default"].w_inh),
                 S=get_int("S", params["default"].S),
-                R_init=get_int("R", params["default"].R_init),
-                Pmax=get_int("Pmax", params["default"].Pmax),
+                R_init=R_init,
+                Pmax=Pmax,
             )
             params[name] = spec
             continue

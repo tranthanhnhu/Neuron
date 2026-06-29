@@ -18,6 +18,13 @@ from snn_mc.archetypes.block_helpers import exc_weights_for_chain
 from snn_mc.ir import ArchetypeInstance, Edge
 from snn_mc.archetypes.base import ArchetypeBase, BlockApplyContext, expand_chain
 from snn_mc.archetypes.graph_index import GraphIndex
+from snn_mc.archetypes.spec_templates import (
+    ctl_propagate_chain,
+    ef_each,
+    oscillation_section,
+    ring_engagement,
+    section,
+)
 
 
 class PositiveLoopArchetype(ArchetypeBase):
@@ -61,10 +68,18 @@ class PositiveLoopArchetype(ArchetypeBase):
         ns = inst.nodes
         if len(ns) < 2:
             return []
-        lines = [f"CTLSPEC EF {n}.spike" for n in ns]
-        for i in range(len(ns) - 1):
-            lines.append(f"CTLSPEC AG ({ns[i]}.spike -> EF {ns[i + 1]}.spike)")
+        lines: List[str] = []
+        lines.extend(ef_each(ns))
+        lines.extend(ctl_propagate_chain(ns))
+        lines.append(section("Loop-closure"))
         lines.append(f"CTLSPEC AG ({ns[-1]}.spike -> EF {ns[0]}.spike)")
+        if len(ns) == 2:
+            lines.extend(oscillation_section(ns))
+            lines.append(section("Ring-engagement"))
+            lines.append(ring_engagement(ns[0], ns[1]))
+        if len(ns) > 2:
+            lines.append(section("End-to-end"))
+            lines.append(f"CTLSPEC AG ({ns[0]}.spike -> EF {ns[-1]}.spike)")
         return lines
 
     @classmethod

@@ -20,6 +20,7 @@ from snn_mc.archetypes.base import (
     validate_archetype_list_size,
 )
 from snn_mc.archetypes.graph_index import GraphIndex
+from snn_mc.archetypes.spec_templates import ef_each, section
 
 
 def _is_full_inh_digraph(nodes: Tuple[str, ...], inh: Set[Tuple[str, str]]) -> bool:
@@ -80,14 +81,16 @@ class ContralateralInhibitionArchetype(ArchetypeBase):
         neurons: Optional[FrozenSet[str]] = None,
         horizon: int = 20,
     ) -> List[str]:
-        """OUTPUT: pairwise mutual exclusion + a steady-winner reachability for each neuron."""
+        """OUTPUT: pairwise mutual exclusion + steady-winner + per-neuron reachability."""
         ns = list(inst.nodes)
         if len(ns) < 2:
             return []
-        lines: List[str] = []
+        lines: List[str] = [section("Safety")]
         for i in range(len(ns)):
             for j in range(i + 1, len(ns)):
                 lines.append(f"CTLSPEC AG !({ns[i]}.spike & {ns[j]}.spike)")
+        lines.extend(ef_each(ns))
+        lines.append(section("Winner-takes-all"))
         for ni in ns:
             others = " & ".join([f"!{nj}.spike" for nj in ns if nj != ni])
             lines.append(f"CTLSPEC EF (EG ({ni}.spike & {others}))")

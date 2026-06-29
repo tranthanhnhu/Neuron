@@ -1,0 +1,251 @@
+*** This is NuSMV 2.7.1 (compiled on Mon Sep 29 16:07:59 2025)
+*** Enabled addons are: compass
+*** For more information on NuSMV see <http://nusmv.fbk.eu>
+*** or email to <nusmv-users@list.fbk.eu>.
+*** Please report bugs to <Please report bugs to <nusmv-users@fbk.eu>>
+
+*** Copyright (c) 2010-2025, Fondazione Bruno Kessler
+
+*** This version of NuSMV is linked to the CUDD library version 2.4.1
+*** Copyright (c) 1995-2004, Regents of the University of Colorado
+
+*** This version of NuSMV is linked to the MiniSat SAT solver. 
+*** See http://minisat.se/MiniSat.html
+*** Copyright (c) 2003-2006, Niklas Een, Niklas Sorensson
+*** Copyright (c) 2007-2010, Niklas Sorensson
+
+-- specification AG (a.spike -> AX a.P = 0)  is true
+-- specification AG (a.P >= 0 & a.P <= a.Pmax)  is true
+-- specification AG (b.spike -> AX b.P = 0)  is true
+-- specification AG (b.P >= 0 & b.P <= b.Pmax)  is true
+-- specification AG !(a.spike & b.spike)  is true
+-- specification EF a.spike  is true
+-- specification EF b.spike  is false
+-- as demonstrated by the following execution sequence
+Trace Description: CTL Counterexample 
+Trace Type: Counterexample 
+  -> State: 1.1 <-
+    t = 0
+    stim = FALSE
+    a.P = 0
+    a.r_num = 1
+    b.P = 0
+    b.r_num = 1
+    a.spike = FALSE
+    a.raw_next = 0
+    a.leak_term = 0
+    a.input_sum = 0
+    a.S_leak = 4
+    a.tau = 6
+    a.Pmax = 10
+    b.spike = FALSE
+    b.raw_next = 0
+    b.leak_term = 0
+    b.input_sum = 0
+    b.S_leak = 4
+    b.tau = 6
+    b.Pmax = 10
+-- specification  G ((a.spike & t < 20) ->  F (t <= 20 & b.spike))  is false
+-- as demonstrated by the following execution sequence
+Trace Description: LTL Counterexample 
+Trace Type: Counterexample 
+  -> State: 2.1 <-
+    t = 0
+    stim = FALSE
+    a.P = 0
+    a.r_num = 1
+    b.P = 0
+    b.r_num = 1
+    a.spike = FALSE
+    a.raw_next = 0
+    a.leak_term = 0
+    a.input_sum = 0
+    a.S_leak = 4
+    a.tau = 6
+    a.Pmax = 10
+    b.spike = FALSE
+    b.raw_next = 0
+    b.leak_term = 0
+    b.input_sum = 0
+    b.S_leak = 4
+    b.tau = 6
+    b.Pmax = 10
+  -> State: 2.2 <-
+    t = 1
+    stim = TRUE
+    a.raw_next = 5
+    a.input_sum = 5
+  -> State: 2.3 <-
+    t = 2
+    stim = FALSE
+    a.P = 5
+    a.raw_next = 1
+    a.leak_term = 1
+    a.input_sum = 0
+  -> State: 2.4 <-
+    t = 3
+    stim = TRUE
+    a.P = 1
+    a.raw_next = 5
+    a.leak_term = 0
+    a.input_sum = 5
+  -> State: 2.5 <-
+    t = 4
+    a.P = 5
+    a.raw_next = 6
+    a.leak_term = 1
+  -> State: 2.6 <-
+    t = 5
+    stim = FALSE
+    a.P = 6
+    a.spike = TRUE
+    a.raw_next = 1
+    a.input_sum = 0
+    b.raw_next = 5
+    b.input_sum = 5
+  -> State: 2.7 <-
+    t = 6
+    a.P = 0
+    b.P = 5
+    a.spike = FALSE
+    a.raw_next = 0
+    a.leak_term = 0
+    b.raw_next = 1
+    b.leak_term = 1
+    b.input_sum = 0
+  -> State: 2.8 <-
+    t = 7
+    b.P = 1
+    b.raw_next = 0
+    b.leak_term = 0
+  -> State: 2.9 <-
+    t = 8
+    b.P = 0
+  -> State: 2.10 <-
+    t = 9
+  -> State: 2.11 <-
+    t = 10
+  -> State: 2.12 <-
+    t = 11
+  -> State: 2.13 <-
+    t = 12
+  -> State: 2.14 <-
+    t = 13
+  -> State: 2.15 <-
+    t = 14
+  -> State: 2.16 <-
+    t = 15
+  -> State: 2.17 <-
+    t = 16
+  -> State: 2.18 <-
+    t = 17
+  -> State: 2.19 <-
+    t = 18
+  -> State: 2.20 <-
+    t = 19
+  -- Loop starts here
+  -> State: 2.21 <-
+    t = 20
+  -> State: 2.22 <-
+-- specification  G ((stim & t < 20) ->  F ((t <= 20 & b.spike) & !a.spike))  is false
+-- as demonstrated by the following execution sequence
+Trace Description: LTL Counterexample 
+Trace Type: Counterexample 
+  -> State: 3.1 <-
+    t = 0
+    stim = FALSE
+    a.P = 0
+    a.r_num = 1
+    b.P = 0
+    b.r_num = 1
+    a.spike = FALSE
+    a.raw_next = 0
+    a.leak_term = 0
+    a.input_sum = 0
+    a.S_leak = 4
+    a.tau = 6
+    a.Pmax = 10
+    b.spike = FALSE
+    b.raw_next = 0
+    b.leak_term = 0
+    b.input_sum = 0
+    b.S_leak = 4
+    b.tau = 6
+    b.Pmax = 10
+  -> State: 3.2 <-
+    t = 1
+    stim = TRUE
+    a.raw_next = 5
+    a.input_sum = 5
+  -> State: 3.3 <-
+    t = 2
+    stim = FALSE
+    a.P = 5
+    a.raw_next = 1
+    a.leak_term = 1
+    a.input_sum = 0
+  -> State: 3.4 <-
+    t = 3
+    stim = TRUE
+    a.P = 1
+    a.raw_next = 5
+    a.leak_term = 0
+    a.input_sum = 5
+  -> State: 3.5 <-
+    t = 4
+    a.P = 5
+    a.raw_next = 6
+    a.leak_term = 1
+  -> State: 3.6 <-
+    t = 5
+    stim = FALSE
+    a.P = 6
+    a.spike = TRUE
+    a.raw_next = 1
+    a.input_sum = 0
+    b.raw_next = 5
+    b.input_sum = 5
+  -> State: 3.7 <-
+    t = 6
+    a.P = 0
+    b.P = 5
+    a.spike = FALSE
+    a.raw_next = 0
+    a.leak_term = 0
+    b.raw_next = 1
+    b.leak_term = 1
+    b.input_sum = 0
+  -> State: 3.8 <-
+    t = 7
+    b.P = 1
+    b.raw_next = 0
+    b.leak_term = 0
+  -> State: 3.9 <-
+    t = 8
+    b.P = 0
+  -> State: 3.10 <-
+    t = 9
+  -> State: 3.11 <-
+    t = 10
+  -> State: 3.12 <-
+    t = 11
+  -> State: 3.13 <-
+    t = 12
+  -> State: 3.14 <-
+    t = 13
+  -> State: 3.15 <-
+    t = 14
+  -> State: 3.16 <-
+    t = 15
+  -> State: 3.17 <-
+    t = 16
+  -> State: 3.18 <-
+    t = 17
+  -> State: 3.19 <-
+    t = 18
+  -> State: 3.20 <-
+    t = 19
+  -- Loop starts here
+  -> State: 3.21 <-
+    t = 20
+  -> State: 3.22 <-

@@ -68,9 +68,20 @@ def emit_properties_block(
     lines.append("")
     lines.append("-- Baseline properties (generated)")
     if emit_mode == "lif":
+        neuron_params = prepared.neuron_params
+        param_specs = prepared.param_specs
         for n in neuron_list:
+            pset_name = neuron_params.get(n, "default")
+            pspec = param_specs.get(pset_name)
+            r_init = pspec.R_init if pspec is not None else 0
+            lines.append(f"-- [{n}] [Safety-Reset]")
             lines.append(f"CTLSPEC AG ({n}.spike -> AX ({n}.P = 0))")
+            lines.append(f"-- [{n}] [Safety-Bound]")
             lines.append(f"CTLSPEC AG (({n}.P >= 0) & ({n}.P <= {n}.Pmax))")
+            lines.append(f"-- [{n}] [Semantic]")
+            lines.append(f"CTLSPEC AG ({n}.spike <-> ({n}.P >= {n}.tau))")
+            lines.append(f"-- [{n}] [Structural]")
+            lines.append(f"CTLSPEC AG ({n}.r_num = {r_init})")
     elif emit_mode == "simple_boolean":
         lines.append("-- (simple_boolean) No LIF P/tau baseline; submodule exposes spike := active only.")
     else:

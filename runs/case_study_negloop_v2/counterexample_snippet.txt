@@ -1,0 +1,160 @@
+Trace Description: CTL Counterexample 
+Trace Type: Counterexample 
+  -> State: 1.1 <-
+    t = 0
+    stim = FALSE
+    a.P = 0
+    a.r_num = 1
+    b.P = 0
+    b.r_num = 1
+    a.spike = FALSE
+    a.raw_next = 0
+    a.leak_term = 0
+    a.input_sum = 0
+    a.S_leak = 4
+    a.tau = 6
+    a.Pmax = 10
+    b.spike = FALSE
+    b.raw_next = 0
+    b.leak_term = 0
+    b.input_sum = 0
+    b.S_leak = 4
+    b.tau = 6
+    b.Pmax = 10
+-- specification AG (a.spike -> EF b.spike)  is false
+-- as demonstrated by the following execution sequence
+Trace Description: CTL Counterexample 
+Trace Type: Counterexample 
+  -> State: 2.1 <-
+    t = 0
+    stim = FALSE
+    a.P = 0
+    a.r_num = 1
+    b.P = 0
+    b.r_num = 1
+    a.spike = FALSE
+    a.raw_next = 0
+    a.leak_term = 0
+    a.input_sum = 0
+    a.S_leak = 4
+    a.tau = 6
+    a.Pmax = 10
+    b.spike = FALSE
+    b.raw_next = 0
+    b.leak_term = 0
+    b.input_sum = 0
+    b.S_leak = 4
+    b.tau = 6
+    b.Pmax = 10
+  -> State: 2.2 <-
+    t = 1
+    stim = TRUE
+    a.raw_next = 5
+    a.input_sum = 5
+  -> State: 2.3 <-
+    t = 2
+    stim = FALSE
+    a.P = 5
+    a.raw_next = 1
+    a.leak_term = 1
+    a.input_sum = 0
+  -> State: 2.4 <-
+    t = 3
+    stim = TRUE
+    a.P = 1
+    a.raw_next = 5
+    a.leak_term = 0
+    a.input_sum = 5
+  -> State: 2.5 <-
+    t = 4
+    a.P = 5
+    a.raw_next = 6
+    a.leak_term = 1
+  -> State: 2.6 <-
+    t = 5
+    stim = FALSE
+    a.P = 6
+    a.spike = TRUE
+    a.raw_next = 1
+    a.input_sum = 0
+    b.raw_next = 5
+    b.input_sum = 5
+-- specification AG (b.spike -> EF a.spike)  is true
+-- specification EF a.spike  is true
+-- specification EF b.spike  is false
+-- as demonstrated by the following execution sequence
+Trace Description: CTL Counterexample 
+Trace Type: Counterexample 
+  -> State: 3.1 <-
+    t = 0
+    stim = FALSE
+    a.P = 0
+    a.r_num = 1
+    b.P = 0
+    b.r_num = 1
+    a.spike = FALSE
+    a.raw_next = 0
+    a.leak_term = 0
+    a.input_sum = 0
+    a.S_leak = 4
+    a.tau = 6
+    a.Pmax = 10
+    b.spike = FALSE
+    b.raw_next = 0
+    b.leak_term = 0
+    b.input_sum = 0
+    b.S_leak = 4
+    b.tau = 6
+    b.Pmax = 10
+-- specification AG (a.spike -> EF b.spike)  is false
+-- as demonstrated by the following execution sequence
+Trace Description: CTL Counterexample 
+Trace Type: Counterexample 
+  -> State: 4.1 <-
+    t = 0
+    stim = FALSE
+    a.P = 0
+    a.r_num = 1
+    b.P = 0
+    b.r_num = 1
+    a.spike = FALSE
+    a.raw_next = 0
+    a.leak_term = 0
+    a.input_sum = 0
+    a.S_leak = 4
+    a.tau = 6
+    a.Pmax = 10
+    b.spike = FALSE
+    b.raw_next = 0
+    b.leak_term = 0
+    b.input_sum = 0
+    b.S_leak = 4
+    b.tau = 6
+    b.Pmax = 10
+  -> State: 4.2 <-
+    t = 1
+    stim = TRUE
+    a.raw_next = 5
+    a.input_sum = 5
+  -> State: 4.3 <-
+    t = 2
+    stim = FALSE
+    a.P = 5
+    a.raw_next = 1
+    a.leak_term = 1
+    a.input_sum = 0
+  -> State: 4.4 <-
+    t = 3
+    stim = TRUE
+    a.P = 1
+    a.raw_next = 5
+    a.leak_term = 0
+    a.input_sum = 5
+  -> State: 4.5 <-
+    t = 4
+    a.P = 5
+    a.raw_next = 6
+    a.leak_term = 1
+  -> State: 4.6 <-
+    t = 5
+    stim = FALSE

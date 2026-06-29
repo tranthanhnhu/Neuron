@@ -1,0 +1,39 @@
+-- Auto-generated properties (snn_mc.smv.properties)
+-- Splice after MODULE main ASSIGN block, before neuron submodule tail (lif_* or bool_thr).
+
+-- Baseline properties (generated)
+-- [a] [Safety-Reset]
+CTLSPEC AG (a.spike -> AX (a.P = 0))
+-- [a] [Safety-Bound]
+CTLSPEC AG ((a.P >= 0) & (a.P <= a.Pmax))
+-- [a] [Semantic]
+CTLSPEC AG (a.spike <-> (a.P >= a.tau))
+-- [a] [Structural]
+CTLSPEC AG (a.r_num = 1)
+-- [b] [Safety-Reset]
+CTLSPEC AG (b.spike -> AX (b.P = 0))
+-- [b] [Safety-Bound]
+CTLSPEC AG ((b.P >= 0) & (b.P <= b.Pmax))
+-- [b] [Semantic]
+CTLSPEC AG (b.spike <-> (b.P >= b.tau))
+-- [b] [Structural]
+CTLSPEC AG (b.r_num = 1)
+
+-- Archetype properties (auto-generated)
+-- From negative_loop on nodes ['a', 'b']
+-- [Safety]
+CTLSPEC AG !(a.spike & b.spike)
+-- [Reachability]
+CTLSPEC EF a.spike
+CTLSPEC EF b.spike
+-- [Feedback]
+CTLSPEC AG (a.spike -> EF b.spike)
+CTLSPEC AG (b.spike -> EF a.spike)
+-- From simple_series on nodes ['a', 'b']
+-- [Reachability]
+CTLSPEC EF a.spike
+CTLSPEC EF b.spike
+-- [Propagation]
+CTLSPEC AG (a.spike -> EF b.spike)
+-- [End-to-end]
+CTLSPEC AG (a.spike -> EF b.spike)

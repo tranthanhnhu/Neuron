@@ -1,0 +1,6 @@
+Step 6 - Verification results
+============================
+
+NuSMV exit code     : 4294967295
+Specifications true : 0
+Specifications false: 0

@@ -1,0 +1,17 @@
+-- Auto-generated properties (snn_mc.smv.properties)
+-- Splice after MODULE main ASSIGN block, before neuron submodule tail (lif_* or bool_thr).
+
+-- Baseline properties (generated)
+CTLSPEC AG (a.spike -> AX (a.P = 0))
+CTLSPEC AG ((a.P >= 0) & (a.P <= a.Pmax))
+CTLSPEC AG (b.spike -> AX (b.P = 0))
+CTLSPEC AG ((b.P >= 0) & (b.P <= b.Pmax))
+
+-- Archetype properties (auto-generated)
+-- From negative_loop on nodes ['a', 'b']
+CTLSPEC AG !(a.spike & b.spike)
+LTLSPEC G ((a.spike & t < 20) -> (F (t <= 20 & b.spike)))
+CTLSPEC EF a.spike
+CTLSPEC EF b.spike
+-- Bounded alternation (optional; tune schedule / LIF if this fails)
+LTLSPEC G ((stim & t < 20) -> F (t <= 20 & b.spike & !a.spike))
