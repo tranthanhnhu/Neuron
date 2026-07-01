@@ -1,101 +1,106 @@
-# snn_mc — Spiking Neural Network Model Checker
+# snn_mc — A verification pipeline for neuronal archetypes
 
-Clean rebuild of the DSL -> Intermediate Representation -> NuSMV -> Python pipeline.
-Lives under `NewStructure/` so it does not interfere with the legacy root code.
+Artifact repository for **snn_mc**, a tool that compiles **NASL** (Neuronal Archetype Specification Language) descriptions of spiking neural archetypes into discrete-time **NuSMV** models and checks CTL/LTL properties automatically.
 
-## What this project does
+**Paper:** *A verification pipeline for neuronal archetypes* — ICTCS 2026 (27th Italian Conference on Theoretical Computer Science, September 07–09, 2026, Udine, Italy). LaTeX source: [`docs/old.tex`](docs/old.tex).
+
+## Overview
 
 ```
-.dsl  (user)  ->  Parser  ->  NetworkIR  ->  Composer  ->  SMV emitter
-                                                                |
-                                              model.smv + properties.smv + combined.smv
-                                                                |
-                                                         NuSMV subprocess
-                                                                |
-                                                Result analysis  ->  Python sim stub
+.dsl (NASL)  →  Parser  →  NetworkIR  →  Composer  →  SMV emitter
+                                                          |
+                                    model.smv + properties.smv + combined.smv
+                                                          |
+                                                   NuSMV model checker
+                                                          |
+                                              results + counterexample traces
 ```
 
-Same six-stage flow as the legacy repo, but each module has a single responsibility,
-N (number of neurons) is parameterized, and the runner emits a numbered set of
-demo artifacts (`step1_*` ... `step6_*`) that the professor can step through.
+The pipeline supports seven neuronal archetype kinds (negative loop, positive loop, simple series, parallel composition, and others), three LIF neuron presets (`slow`, `intermediate`, `quick`), automatic archetype detection, and archetype-driven property generation.
 
-## Layout
+## Requirements
 
-| Path | Purpose |
+| Component | Version / notes |
 | --- | --- |
-| `snn_mc/cli.py` | Entry point. `python -m snn_mc run <file.dsl>` |
-| `snn_mc/ir.py` | NetworkIR / Edge / ArchetypeInstance / Composition / ParamSpec |
-| `snn_mc/dsl/parser.py` | Line-based DSL parser -> NetworkIR |
-| `snn_mc/archetypes/` | 7 archetype kinds, each supports `neurons=` OR `N=/prefix=` |
-| `snn_mc/composer.py` | Semantic validation (LEAD/FOLLOWER, role check, name existence) |
-| `snn_mc/smv/` | NuSMV emission: LIF module + main model + properties + combined |
-| `snn_mc/verify/` | NuSMV subprocess + log parser |
-| `snn_mc/sim/` | Post-verify Python stub |
-| `snn_mc/report/` | 6-step demo artifacts (diagram, IR, composition, properties, results) |
-| `examples/` | Demo DSL files (`series_negloop.dsl` is the main one) |
-| `reference/` | Hand-written `lif_neuron_6.smv` and 6 golden archetype SMV files |
-| `docs/` | `luong_chay_du_an.md` / `project_flow.md` (code flow, VN/EN), `pipeline.md`, `parameterize_N.md`, `huong_dan_su_dung.md` |
-| `tests/` | Smoke test running the demo example with `--skip-verify` |
+| Python | ≥ 3.10 |
+| NuSMV | 2.7.x on `PATH` ([download](https://nusmv.fbk.eu/downloads.html)); optional local install via [`tools/README.md`](tools/README.md) |
+| pytest | ≥ 7 (optional, for tests only) |
+
+No third-party Python packages are required at runtime (`requirements.txt` documents this).
 
 ## Quickstart
 
+Reproduce the **negative feedback loop** case study from Section 4 of the paper:
+
 ```bash
-# 1. NuSMV must be on PATH (see top-level TONG_QUAN_DU_AN.md).
-# 2. Run the demo pipeline:
+python -m snn_mc run examples/negloop_only.dsl --out runs/case_study_negloop_sigma
+```
+
+Expected outputs under `runs/case_study_negloop_sigma/`:
+
+| File | Description |
+| --- | --- |
+| `combined.smv` | NuSMV model + properties (input to the checker) |
+| `model.smv`, `properties.smv` | Separated model and specification files |
+| `nusmv.log` | Full NuSMV stdout/stderr |
+| `step1_diagram.md` … `step6_results.txt` | Numbered report artefacts |
+| `sim_stub.txt` | Post-verification wiring summary (if specs pass and `--skip-sim` is not set) |
+
+**Exit codes:** `0` success · `1` at least one property false · `2` DSL not found · `3` NuSMV unavailable · `4` unparsable NuSMV log
+
+### Other examples
+
+```bash
+# Simple series chained into a negative loop (4 + 2 neurons)
 python -m snn_mc run examples/series_negloop.dsl --out runs/demo
 
-# Output:
-#   runs/demo/step1_diagram.md
-#   runs/demo/step2_input.dsl
-#   runs/demo/step3_ir.json
-#   runs/demo/step4_composition.txt
-#   runs/demo/step5_properties.smv
-#   runs/demo/step6_results.txt
-#   runs/demo/{model,properties,combined}.smv
-#   runs/demo/nusmv.log
-#   runs/demo/sim_stub.txt
+# Emit SMV only (no NuSMV required)
+python -m snn_mc run examples/series_negloop.dsl --out runs/demo --skip-verify
 ```
 
-## Parameterizing N
+See [`examples/`](examples/) for additional DSL files. Shared LIF parameters are defined in [`examples/neuron_base.dsl`](examples/neuron_base.dsl).
 
-Two equivalent ways to declare a 4-neuron chain:
-
-```text
-# Explicit list (legacy style):
-block simple_series input=stim neurons=c1,c2,c3,c4 params=default
-
-# Parameterized N (new):
-block simple_series input=stim N=4 prefix=c params=default
-```
-
-CLI override applies the same N to every block that uses `N=`:
+### CLI options
 
 ```bash
-python -m snn_mc run examples/series_negloop.dsl --override N=10
+python -m snn_mc run <file.dsl> --out <dir> \
+  [--nusmv PATH] [--skip-verify] [--skip-sim] \
+  [--emit-mode lif|simple_boolean] \
+  [--override N=4]
 ```
 
-See `docs/parameterize_N.md` for details.
+## Project layout
 
-## Demo example: Simple Series + Negative Loop
+| Path | Role |
+| --- | --- |
+| [`snn_mc/cli.py`](snn_mc/cli.py) | CLI entry point (`python -m snn_mc run …`) |
+| [`snn_mc/dsl/`](snn_mc/dsl/) | NASL parser |
+| [`snn_mc/archetypes/`](snn_mc/archetypes/) | Archetype blocks, detection, property templates |
+| [`snn_mc/smv/`](snn_mc/smv/) | NuSMV model and property emission |
+| [`snn_mc/verify/`](snn_mc/verify/) | NuSMV subprocess and log parsing |
+| [`snn_mc/report/`](snn_mc/report/) | Step-by-step report files |
+| [`examples/`](examples/) | Reference NASL specifications |
+| [`reference/`](reference/) | Hand-written golden SMV references |
+| [`docs/`](docs/) | Paper (`old.tex`), pipeline diagram, supplementary notes |
+| [`tests/`](tests/) | Smoke and parser tests |
 
-```mermaid
-flowchart LR
-  stim --> c1 --> c2 --> c3 --> c4
-  c4 -->|exc| a
-  a -->|exc| b
-  b -.->|inh| a
+## Tests
+
+```bash
+pip install pytest
+pytest tests/ -q
 ```
 
-DSL the user writes:
+The smoke test runs with `--skip-verify` and does not require NuSMV.
 
-```text
-include neuron_base.dsl
-input stim
-schedule stim values TRUE TRUE FALSE TRUE TRUE FALSE
+## Citation
 
-block simple_series  input=stim N=4 prefix=c params=default
-block negative_loop  input=c4  A=a B=b           params=default
-```
+If you use this artifact, please cite the ICTCS 2026 paper (*A verification pipeline for neuronal archetypes*).
 
-Run it with `python -m snn_mc run examples/series_negloop.dsl --out runs/demo`
-and present `step1..step6` files to the professor.
+## Authors
+
+Thi-Thuy-Duong Pham, Elisabetta De Maria, Robert De Simone — I3S / Université Côte d'Azur; Inria Université Côte d'Azur.
+
+## License
+
+Source code and examples are provided for research and reproducibility purposes in connection with the ICTCS 2026 submission.
